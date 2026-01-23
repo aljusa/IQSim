@@ -1,448 +1,741 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Anvil, 
-  ArrowRight, 
-  Activity, 
-  Layers, 
-  Minimize2, 
-  Maximize2, 
-  Settings, 
-  Thermometer, 
-  ShieldCheck, 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
    
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  ReferenceLine
+} from 'recharts';
+import { 
+  Activity, 
+  Settings, 
+  Target, 
+  RefreshCw, 
+  Maximize, 
+   
+  CheckCircle2,
+  AlertCircle,
+  ArrowRight
 } from 'lucide-react';
+import DivCarousel from '../assets/DivCarousel';
 
-// --- Componentes de Diagramas (Visualizaciones) ---
-// MOVIDOS FUERA DEL COMPONENTE APP PARA EVITAR ERRORES DE HOOKS
+// --- Interfaces & Types ---
 
-// 1. Diagrama estático general de objetivos
-const GeneralObjectivesDiagram: React.FC = () => (
-  <div className="w-full h-64 bg-slate-50 border-2 border-slate-200 rounded-lg p-4 grid grid-cols-3 gap-4 place-items-center relative overflow-hidden">
-    {/* Nodos */}
-    <div className="z-10 bg-blue-100 p-4 rounded-lg border border-blue-300 text-center grid place-items-center">
-      <Settings className="w-8 h-8 text-blue-600 mb-2" />
-      <span className="text-sm font-bold text-blue-800">Uso Final</span>
-    </div>
-    
-    <div className="z-10 text-slate-400">
-      <ArrowRight className="w-8 h-8" />
-    </div>
-
-    <div className="z-10 bg-emerald-100 p-4 rounded-lg border border-emerald-300 text-center grid place-items-center">
-      <ShieldCheck className="w-8 h-8 text-emerald-600 mb-2" />
-      <span className="text-sm font-bold text-emerald-800">Propiedad Requerida</span>
-    </div>
-
-    {/* Conexión inferior */}
-    <div className="col-span-3 w-full grid grid-cols-1 place-items-center mt-4">
-      <div className="bg-orange-100 px-6 py-2 rounded-full border border-orange-300 text-orange-800 font-semibold text-sm">
-        Tratamiento Térmico (El Puente)
-      </div>
-    </div>
-    
-    {/* Líneas decorativas SVG */}
-    <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-20">
-      <line x1="20%" y1="30%" x2="50%" y2="80%" stroke="black" strokeWidth="2" strokeDasharray="5,5" />
-      <line x1="80%" y1="30%" x2="50%" y2="80%" stroke="black" strokeWidth="2" strokeDasharray="5,5" />
-    </svg>
-  </div>
-);
-
-// 2. Diagrama estático comparativo de propiedades
-const PropertiesComparisionDiagram: React.FC = () => (
-  <div className="w-full h-64 bg-white p-6 rounded-lg border border-slate-200 grid grid-cols-2 gap-8 items-end">
-    {/* Antes */}
-    <div className="grid gap-2 justify-items-center w-full">
-      <div className="w-full grid grid-cols-2 gap-2 h-32 items-end">
-        <div className="bg-slate-300 h-[40%] w-full rounded-t relative group">
-          <span className="absolute -top-6 left-0 w-full text-center text-xs font-bold text-slate-500">Dureza</span>
-        </div>
-        <div className="bg-blue-300 h-[80%] w-full rounded-t relative group">
-            <span className="absolute -top-6 left-0 w-full text-center text-xs font-bold text-blue-500">Ductilidad</span>
-        </div>
-      </div>
-      <span className="font-semibold text-slate-600 border-t border-slate-300 w-full text-center pt-2">Metal Base</span>
-    </div>
-
-    {/* Después */}
-    <div className="grid gap-2 justify-items-center w-full">
-      <div className="w-full grid grid-cols-2 gap-2 h-32 items-end">
-        <div className="bg-slate-600 h-[90%] w-full rounded-t relative">
-          <span className="absolute -top-6 left-0 w-full text-center text-xs font-bold text-slate-800">Dureza</span>
-        </div>
-        <div className="bg-blue-600 h-[30%] w-full rounded-t relative">
-            <span className="absolute -top-6 left-0 w-full text-center text-xs font-bold text-blue-800">Ductilidad</span>
-        </div>
-      </div>
-      <span className="font-semibold text-slate-600 border-t border-slate-300 w-full text-center pt-2">Tratado Térmicamente</span>
-    </div>
-  </div>
-);
-
-// 3. Diagrama estático de microestructura
-const MicrostructureDiagram: React.FC = () => (
-  <div className="w-full h-64 grid grid-cols-2 gap-4">
-    {/* Grano Grueso */}
-    <div className="border-4 border-slate-300 rounded-full bg-slate-50 overflow-hidden relative grid place-items-center">
-      <svg viewBox="0 0 100 100" className="w-full h-full absolute inset-0 opacity-50">
-          <path d="M0,0 L40,20 L60,0 L100,20 L100,60 L70,100 L20,80 L0,50 Z" fill="none" stroke="#94a3b8" strokeWidth="1" />
-          <path d="M40,20 L50,50 L20,80" fill="none" stroke="#94a3b8" strokeWidth="1" />
-          <path d="M60,0 L50,50 L70,100" fill="none" stroke="#94a3b8" strokeWidth="1" />
-          <path d="M100,60 L50,50" fill="none" stroke="#94a3b8" strokeWidth="1" />
-      </svg>
-      <div className="bg-slate-800/80 text-white px-2 py-1 rounded text-xs z-10 text-center">
-        Grano Grueso<br/>(Menor Resistencia)
-      </div>
-    </div>
-
-    {/* Grano Fino */}
-    <div className="border-4 border-indigo-300 rounded-full bg-indigo-50 overflow-hidden relative grid place-items-center">
-        <svg viewBox="0 0 100 100" className="w-full h-full absolute inset-0 opacity-50">
-          <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#6366f1" strokeWidth="0.5"/>
-          </pattern>
-          <rect width="100" height="100" fill="url(#grid)" />
-      </svg>
-      <div className="bg-indigo-800/80 text-white px-2 py-1 rounded text-xs z-10 text-center">
-        Grano Fino<br/>(Mayor Resistencia)
-      </div>
-    </div>
-  </div>
-);
-
-// 4. Diagrama dinámico de tensiones internas
-const InternalStressDiagram: React.FC = () => {
-  // Simulación simple de estado visual
-  const [treated, setTreated] = useState(false);
-
-  useEffect(() => {
-    const timer = setInterval(() => setTreated(t => !t), 3000);
-    return () => clearInterval(timer);
-  }, []);
-
-  return (
-    <div className="w-full h-64 bg-slate-900 rounded-lg p-6 grid grid-rows-[auto_1fr] gap-4">
-      <div className="text-center text-white text-sm">
-        Estado: <span className={treated ? "text-emerald-400 font-bold" : "text-red-400 font-bold"}>
-          {treated ? "Tratamiento de Alivio Aplicado" : "Bajo Tensión (Fabricación)"}
-        </span>
-      </div>
-      
-      <div className="relative w-full h-full bg-slate-700 rounded grid place-items-center overflow-hidden">
-        {/* Bloque de Metal */}
-        <div className={`w-32 h-32 bg-slate-400 rounded transition-all duration-1000 grid place-items-center z-10 ${treated ? 'scale-100' : 'scale-95'}`}>
-          <Anvil className="text-slate-600 w-12 h-12" />
-        </div>
-
-        {/* Flechas de Tensión (Animadas) */}
-        {!treated && (
-          <>
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 animate-bounce text-red-500 font-bold">↓↓↓</div>
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 animate-bounce text-red-500 font-bold">↑↑↑</div>
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 animate-pulse text-red-500 font-bold">→→→</div>
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 animate-pulse text-red-500 font-bold">←←←</div>
-          </>
-        )}
-
-        {/* Efecto de Alivio */}
-        {treated && (
-          <div className="absolute inset-0 bg-emerald-500/20 animate-pulse grid place-items-center">
-              <span className="text-emerald-300 font-bold text-lg">Estructura Relajada</span>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-// 5. Diagrama dinámico de comportamiento en servicio
-const ServiceBehaviorDiagram: React.FC = () => {
-  // Animación simple con CSS
-  return (
-    <div className="w-full h-64 bg-slate-50 border border-slate-200 rounded-lg p-4 relative overflow-hidden">
-      <h4 className="text-xs font-bold text-slate-500 mb-2">Desempeño vs Tiempo</h4>
-      
-      <svg viewBox="0 0 400 200" className="w-full h-full">
-        {/* Ejes */}
-        <line x1="20" y1="180" x2="380" y2="180" stroke="#94a3b8" strokeWidth="2" />
-        <line x1="20" y1="180" x2="20" y2="20" stroke="#94a3b8" strokeWidth="2" />
-        
-        <text x="340" y="195" fontSize="12" fill="#64748b">Tiempo</text>
-        <text x="25" y="30" fontSize="12" fill="#64748b">Vida Útil</text>
-
-        {/* Línea Sin Tratamiento (Decae rápido) */}
-        <path d="M 20 50 Q 150 60 200 180" fill="none" stroke="#ef4444" strokeWidth="3" strokeDasharray="5,5" />
-        <text x="100" y="120" fontSize="10" fill="#ef4444">Sin Tratamiento (Falla prematura)</text>
-
-        {/* Línea Con Tratamiento (Estable) */}
-        <path d="M 20 50 C 150 50, 300 50, 380 100" fill="none" stroke="#10b981" strokeWidth="3">
-          <animate attributeName="stroke-dasharray" from="0, 400" to="400, 0" dur="3s" repeatCount="indefinite" />
-        </path>
-        <text x="250" y="70" fontSize="10" fill="#059669" fontWeight="bold">Tratado (Larga duración)</text>
-
-        {/* Indicador de momento actual */}
-        <circle cx="20" cy="50" r="4" fill="#3b82f6">
-          <animate attributeName="cx" values="20;380" dur="3s" repeatCount="indefinite" />
-          <animate attributeName="cy" values="50;100" keyTimes="0;1" dur="3s" repeatCount="indefinite" calcMode="spline" keySplines="0.42 0 0.58 1" />
-        </circle>
-      </svg>
-    </div>
-  );
-};
-
-// 6. Diagrama estático de flujo de fabricación
-const ManufacturingFlowDiagram: React.FC = () => (
-  <div className="w-full h-64 grid grid-cols-4 gap-2 items-center">
-    {[
-      { icon: <Layers />, label: "Fundición", color: "bg-slate-200" },
-      { icon: <Settings />, label: "Mecanizado", color: "bg-slate-300" },
-      { icon: <Thermometer />, label: "Tratamiento Térmico", color: "bg-orange-100 border-2 border-orange-400 animate-pulse" },
-      { icon: <ShieldCheck />, label: "Acabado", color: "bg-slate-200" }
-    ].map((step, idx) => (
-      <React.Fragment key={idx}>
-        <div className={`${step.color} h-32 rounded-lg p-2 grid place-items-center text-center shadow-sm`}>
-          <div className="text-slate-700">{step.icon}</div>
-          <span className="text-xs font-bold mt-2 text-slate-800">{step.label}</span>
-        </div>
-        {idx < 3 && (
-          <div className="absolute left-[25%] hidden"> {/* Spacer for layout logic if needed, but grid gap handles it */} </div>
-        )}
-      </React.Fragment>
-    ))}
-    
-    {/* Flechas superpuestas visualmente con Grid */}
-    <div className="col-span-4 row-start-1 grid grid-cols-4 pointer-events-none h-full items-center">
-        <div className="col-start-1 border-b-4 border-slate-300/50 translate-x-1/2"></div>
-        <div className="col-start-2 border-b-4 border-slate-300/50 translate-x-1/2"></div>
-        <div className="col-start-3 border-b-4 border-slate-300/50 translate-x-1/2"></div>
-    </div>
-  </div>
-);
-
-// 7. Diagrama estático integrador
-const IntegratorDiagram: React.FC = () => (
-  <div className="w-full h-64 bg-slate-800 rounded-lg p-4 relative grid place-items-center">
-    <div className="grid grid-cols-3 grid-rows-3 w-full h-full gap-4">
-      {/* Centro */}
-      <div className="col-start-2 row-start-2 bg-white rounded-full grid place-items-center z-20 shadow-lg border-4 border-orange-500">
-        <div className="text-center">
-          <Thermometer className="w-6 h-6 mx-auto text-orange-600" />
-          <span className="text-[10px] font-bold block">Tratamiento</span>
-        </div>
-      </div>
-
-      {/* Satélites */}
-      <div className="col-start-1 row-start-1 bg-blue-100 rounded p-2 grid place-items-center text-[10px] font-bold text-center z-10 opacity-90">
-        Microestructura
-      </div>
-      <div className="col-start-3 row-start-1 bg-emerald-100 rounded p-2 grid place-items-center text-[10px] font-bold text-center z-10 opacity-90">
-        Propiedades
-      </div>
-      <div className="col-start-1 row-start-3 bg-purple-100 rounded p-2 grid place-items-center text-[10px] font-bold text-center z-10 opacity-90">
-        Fabricación
-      </div>
-      <div className="col-start-3 row-start-3 bg-red-100 rounded p-2 grid place-items-center text-[10px] font-bold text-center z-10 opacity-90">
-        Servicio
-      </div>
-
-      {/* Conectores SVG */}
-      <svg className="absolute inset-0 w-full h-full pointer-events-none">
-        <line x1="20%" y1="20%" x2="50%" y2="50%" stroke="white" strokeWidth="2" opacity="0.5" />
-        <line x1="80%" y1="20%" x2="50%" y2="50%" stroke="white" strokeWidth="2" opacity="0.5" />
-        <line x1="20%" y1="80%" x2="50%" y2="50%" stroke="white" strokeWidth="2" opacity="0.5" />
-        <line x1="80%" y1="80%" x2="50%" y2="50%" stroke="white" strokeWidth="2" opacity="0.5" />
-      </svg>
-    </div>
-  </div>
-);
-
-
-// Definición de tipos para los datos de las secciones
-interface SectionData {
+interface LessonSection {
   id: string;
   title: string;
   shortTitle: string;
-  type: 'Estático' | 'Dinámico';
-  purpose: string;
-  description: string;
-  Component: React.FC; // Cambiado de renderDiagram a Component
+  description: React.ReactNode;
+  component: React.ReactNode;
 }
 
-const Lesson3: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<number>(0);
+interface DiagramProps {
+  isActive?: boolean;
+}
 
-  // Datos principales
-  const sections: SectionData[] = [
-    {
-      id: 'obj-gen',
-      title: 'Objetivos Generales',
-      shortTitle: 'Objetivos',
-      type: 'Estático',
-      purpose: 'Relacionar el uso final con el objetivo y propiedades.',
-      description: 'El tratamiento térmico no es un fin en sí mismo, sino un medio para adaptar un material a una función específica. Este diagrama muestra el flujo lógico desde la necesidad del componente hasta la obtención de las propiedades mecánicas requeridas mediante el proceso térmico.',
-      Component: GeneralObjectivesDiagram
-    },
-    {
-      id: 'prop-mec',
-      title: 'Propiedades Mecánicas',
-      shortTitle: 'Propiedades',
-      type: 'Estático',
-      purpose: 'Mostrar cambios en propiedades antes y después.',
-      description: 'Comparación directa de un metal base versus uno tratado. Generalmente, existe un compromiso (trade-off): al aumentar la dureza y resistencia, suele disminuir la ductilidad. El tratamiento busca el equilibrio óptimo.',
-      Component: PropertiesComparisionDiagram
-    },
-    {
-      id: 'micro',
-      title: 'Microestructura',
-      shortTitle: 'Microestructura',
-      type: 'Estático',
-      purpose: 'Comparar grano fino vs grano grueso.',
-      description: 'La estructura interna define las propiedades externas. Un grano fino (derecha) ofrece más barreras al movimiento de dislocaciones, aumentando la resistencia y tenacidad, a diferencia de un grano grueso (izquierda).',
-      Component: MicrostructureDiagram
-    },
-    {
-      id: 'tensiones',
-      title: 'Tensiones Internas',
-      shortTitle: 'Tensiones',
-      type: 'Dinámico',
-      purpose: 'Generación y alivio de tensiones.',
-      description: 'Durante la conformación mecánica o soldadura, se acumulan tensiones residuales (rojo). El recocido o alivio de tensiones permite que la red atómica se relaje (verde), evitando distorsiones o fallas futuras.',
-      Component: InternalStressDiagram
-    },
-    {
-      id: 'servicio',
-      title: 'Comportamiento en Servicio',
-      shortTitle: 'Servicio',
-      type: 'Dinámico',
-      purpose: 'Comparar desempeño en vida útil.',
-      description: 'Gráfico tiempo-desempeño. La línea punteada roja representa un componente que falla prematuramente por fatiga o desgaste. La línea verde muestra cómo el tratamiento extiende la vida útil bajo condiciones reales de carga.',
-      Component: ServiceBehaviorDiagram
-    },
-    {
-      id: 'flujo',
-      title: 'Flujo de Fabricación',
-      shortTitle: 'Flujo',
-      type: 'Estático',
-      purpose: 'Etapa dentro del proceso global.',
-      description: 'El tratamiento térmico es un eslabón crítico. Si se hace demasiado pronto, el mecanizado posterior puede ser difícil; si se hace tarde, se pueden perder tolerancias dimensionales. Su ubicación en el flujo es estratégica.',
-      Component: ManufacturingFlowDiagram
-    },
-    {
-      id: 'integrador',
-      title: 'Visión Integradora',
-      shortTitle: 'Integrador',
-      type: 'Estático',
-      purpose: 'Conexión global de objetivos y efectos.',
-      description: 'Una vista holística. El tratamiento térmico es el núcleo que conecta la ciencia de materiales (microestructura) con la ingeniería de manufactura y la fiabilidad del producto final en servicio.',
-      Component: IntegratorDiagram
-    },
-  ];
+// --- Componentes de UI Base (Grid System - No Flexbox) ---
 
-  // Componente Activo
-  const ActiveComponent = sections[activeTab].Component;
+const Card: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => (
+  <div className={`bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden ${className}`}>
+    {children}
+  </div>
+);
+
+
+
+// --- 1. Diagrama Estático: Explicación Inicial ---
+
+const InitialModelDiagram: React.FC = () => {
+  return (
+   <div className="w-full h-96 grid place-items-center bg-slate-50 p-4">
+  <svg viewBox="0 0 420 320" className="w-full h-full max-w-xl">
+
+    {/* Definición de flechas */}
+    <defs>
+      <marker
+        id="arrow"
+        markerWidth="10"
+        markerHeight="10"
+        refX="6"
+        refY="3"
+        orient="auto"
+        markerUnits="strokeWidth"
+      >
+        <path d="M0,0 L0,6 L9,3 z" fill="#64748b" />
+      </marker>
+    </defs>
+
+    {/* Conexiones */}
+    <line x1="210" y1="160" x2="210" y2="60" stroke="#64748b" strokeWidth="2" markerEnd="url(#arrow)" />
+    <line x1="210" y1="160" x2="210" y2="260" stroke="#64748b" strokeWidth="2" markerEnd="url(#arrow)" />
+    <line x1="210" y1="160" x2="90" y2="160" stroke="#64748b" strokeWidth="2" markerEnd="url(#arrow)" />
+    <line x1="210" y1="160" x2="330" y2="160" stroke="#64748b" strokeWidth="2" markerEnd="url(#arrow)" />
+
+    {/* Centro */}
+    <circle cx="210" cy="160" r="48" fill="#2563eb" />
+    <text x="210" y="155" textAnchor="middle" fill="white" className="text-sm font-bold">
+      MODELO
+    </text>
+    <text x="210" y="172" textAnchor="middle" fill="white" className="text-[10px] opacity-90">
+      Núcleo matemático
+    </text>
+
+    {/* Simulación */}
+    <g>
+      <circle cx="210" cy="60" r="46" fill="#e0f2fe" stroke="#0284c7" strokeWidth="2" />
+      <text x="210" y="55" textAnchor="middle" className="text-xs font-semibold fill-slate-800">
+        Simulación
+      </text>
+      <text x="210" y="70" textAnchor="middle" className="text-[10px] fill-slate-600">
+        Predice el sistema
+      </text>
+    </g>
+
+    {/* Control */}
+    <g>
+      <circle cx="330" cy="160" r="46" fill="#dcfce7" stroke="#16a34a" strokeWidth="2" />
+      <text x="330" y="155" textAnchor="middle" className="text-xs font-semibold fill-slate-800">
+        Control
+      </text>
+      <text x="330" y="170" textAnchor="middle" className="text-[10px] fill-slate-600">
+        Ajusta acciones
+      </text>
+    </g>
+
+    {/* Optimización */}
+    <g>
+      <circle cx="210" cy="260" r="46" fill="#fef3c7" stroke="#d97706" strokeWidth="2" />
+      <text x="210" y="255" textAnchor="middle" className="text-xs font-semibold fill-slate-800">
+        Optimización
+      </text>
+      <text x="210" y="270" textAnchor="middle" className="text-[10px] fill-slate-600">
+        Mejora resultados
+      </text>
+    </g>
+
+    {/* Dimensiones */}
+    <g>
+      <circle cx="90" cy="160" r="46" fill="#f1f5f9" stroke="#475569" strokeWidth="2" />
+      <text x="90" y="155" textAnchor="middle" className="text-xs font-semibold fill-slate-800">
+        Dimensiones
+      </text>
+      <text x="90" y="170" textAnchor="middle" className="text-[10px] fill-slate-600">
+        Variables y estados
+      </text>
+    </g>
+  </svg>
+</div>
+
+  );
+};
+
+// --- 2. Diagrama Dinámico: Progresión Análisis -> Acción ---
+
+const ProgressionDiagram: React.FC = () => {
+
+  const LEVELS = [
+  {
+    title: 'Descripción',
+    subtitle: '¿Qué está pasando?',
+    level: 1,
+    styles: 'border-slate-300 bg-white text-slate-700',
+  },
+  {
+    title: 'Predicción',
+    subtitle: '¿Qué podría pasar?',
+    level: 2,
+    styles: 'border-blue-200 bg-blue-50 text-blue-700',
+  },
+  {
+    title: 'Prescripción',
+    subtitle: '¿Qué debería hacerse?',
+    level: 3,
+    styles: 'border-blue-400 bg-blue-100 text-blue-800',
+  },
+  {
+    title: 'Automatización',
+    subtitle: 'El sistema actúa solo',
+    level: 4,
+    styles: 'border-blue-600 bg-blue-200 text-blue-900 font-bold shadow-md',
+  },
+]
 
   return (
-    <div className="w-full h-screen bg-slate-100 text-slate-800 font-sans overflow-hidden grid grid-rows-[auto_1fr]">
-      {/* Header / Navigation Tabs */}
-      <header className="bg-slate-900 text-white shadow-lg z-10">
-        <div className="p-4 border-b border-slate-700">
-          <h1 className="text-xl font-bold flex items-center gap-2">
-            <Thermometer className="text-orange-500" />
-            Visualizador de Tratamientos Térmicos
-          </h1>
-        </div>
-        
-        {/* Grid de Pestañas - NO FLEX */}
-        <nav className="w-full grid grid-cols-4 md:grid-cols-7 gap-1 p-1 bg-slate-800">
-          {sections.map((section, index) => (
-            <button
-              key={section.id}
-              onClick={() => setActiveTab(index)}
+    <div className="w-full p-8 bg-slate-50">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-center">
+
+        {LEVELS.map((item, idx) => (
+          <div key={item.level} className="relative flex items-center">
+            <div
               className={`
-                py-3 px-2 text-xs md:text-sm font-medium transition-all duration-200 relative
-                grid place-items-center text-center h-full
-                ${activeTab === index 
-                  ? 'bg-slate-100 text-slate-900 rounded-t-sm shadow-[0_-2px_0_0_#f97316_inset]' 
-                  : 'text-slate-400 hover:bg-slate-700 hover:text-white'}
+                w-full p-5 rounded-xl border-2 text-center
+                transition-all duration-500 hover:scale-[1.02]
+                ${item.styles}
               `}
             >
-              {section.shortTitle}
-              {activeTab === index && (
-                <div className="absolute bottom-0 left-0 w-full h-1 bg-orange-500"></div>
-              )}
-            </button>
-          ))}
+              <span className="block text-xs uppercase tracking-wide opacity-70 mb-1">
+                Nivel {item.level}
+              </span>
+
+              <h3 className="text-sm font-semibold mb-1">
+                {item.title}
+              </h3>
+
+              <p className="text-xs opacity-80">
+                {item.subtitle}
+              </p>
+            </div>
+
+            {idx < LEVELS.length - 1 && (
+              <div className="hidden md:flex absolute -right-5 top-1/2 -translate-y-1/2 text-slate-400">
+                <ArrowRight size={22} />
+              </div>
+            )}
+          </div>
+        ))}
+
+      </div>
+
+      {/* Clasificación */}
+      <div className="grid grid-cols-2 gap-8 mt-10 text-center text-sm">
+        <div className="border-t border-slate-300 pt-3 text-slate-500">
+          Análisis Pasivo
+        </div>
+        <div className="border-t border-blue-600 pt-3 font-semibold text-blue-700">
+          Intervención Activa
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// --- 3. Diagrama Dinámico: Flujo de Simulación ---
+
+const SimulationFlowDiagram: React.FC<DiagramProps> = () => {
+const [active, setActive] = useState('input');
+
+return (
+  <div className="w-full bg-slate-50 rounded-xl p-6 grid items-center justify-items-center border border-slate-200">
+
+    {/* Flujo principal */}
+    <div className="grid grid-flow-col gap-6 items-center">
+
+      {/* Entradas */}
+      <button
+        onClick={() => setActive('input')}
+        className={`
+          px-5 py-4 rounded-lg border text-sm font-medium cursor-pointer
+          transition-all duration-300
+          ${active === 'input'
+            ? 'bg-amber-100 border-amber-400 text-amber-900 shadow-md scale-105'
+            : 'bg-white border-slate-300 text-slate-500 hover:bg-slate-100'}
+        `}
+      >
+        Entradas (u)
+      </button>
+
+      <ArrowRight size={22} className="text-slate-300" />
+
+      {/* Modelo */}
+      <button
+        onClick={() => setActive('model')}
+        className={`
+          px-6 py-5 rounded-full border-2 font-mono text-sm cursor-pointer
+          transition-all duration-300
+          ${active === 'model'
+            ? 'bg-blue-100 border-blue-500 text-blue-700 shadow-lg scale-105'
+            : 'bg-white border-blue-300 text-blue-400 hover:bg-blue-50'}
+        `}
+      >
+        f(x, u, t)
+      </button>
+
+      <ArrowRight size={22} className="text-slate-300" />
+
+      {/* Salidas */}
+      <button
+        onClick={() => setActive('output')}
+        className={`
+          px-5 py-4 rounded-lg border text-sm font-medium cursor-pointer
+          transition-all duration-300
+          ${active === 'output'
+            ? 'bg-green-100 border-green-500 text-green-800 shadow-md scale-105'
+            : 'bg-white border-slate-300 text-slate-500 hover:bg-slate-100'}
+        `}
+      >
+        Salidas (y)
+      </button>
+
+    </div>
+
+    {/* Texto explicativo */}
+    <div className="mt-6 text-slate-600 text-sm text-center max-w-md min-h-[3rem]">
+
+      {active === null && (
+        "Haz clic en cualquier bloque para entender su rol dentro del sistema."
+      )}
+
+      {active === 'input' && (
+        "Las entradas representan las variables externas o de control que alimentan al sistema."
+      )}
+
+      {active === 'model' && (
+        "El modelo matemático describe cómo evolucionan los estados internos en función del tiempo y las entradas."
+      )}
+
+      {active === 'output' && (
+        "Las salidas son las magnitudes observables que permiten evaluar el comportamiento del sistema."
+      )}
+
+    </div>
+
+  </div>
+);
+};
+
+// --- 4. Diagrama Interactivo: Dimensionamiento ---
+
+const SizingInteractiveDiagram: React.FC = () => {
+  const [capacity, setCapacity] = useState(50);
+  const requirement = 80;
+  const isPassed = capacity >= requirement;
+
+  const data = [
+    { name: 'Requerido', value: requirement, fill: '#94a3b8' },
+    { name: 'Diseño Actual', value: capacity, fill: isPassed ? '#22c55e' : '#ef4444' },
+  ];
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
+      <div className="space-y-6">
+        <h3 className="font-semibold text-slate-700 flex items-center gap-2">
+          <Settings className="w-5 h-5" /> Parámetros de Diseño
+        </h3>
+        <div>
+          <label className="block text-sm font-medium text-slate-600 mb-2">Capacidad del Tanque (L)</label>
+          <input 
+            type="range" 
+            min="0" 
+            max="150" 
+            value={capacity} 
+            onChange={(e) => setCapacity(Number(e.target.value))}
+            className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+          />
+          <div className="text-right font-mono text-blue-600 font-bold">{capacity} L</div>
+        </div>
+        
+        <div className={`p-4 rounded-lg border-l-4 ${isPassed ? 'bg-green-50 border-green-500' : 'bg-red-50 border-red-500'}`}>
+          <div className="flex items-center gap-2 font-bold mb-1">
+            {isPassed ? <CheckCircle2 className="text-green-600 w-5 h-5"/> : <AlertCircle className="text-red-600 w-5 h-5"/>}
+            <span className={isPassed ? 'text-green-800' : 'text-red-800'}>
+              {isPassed ? 'Requisito Cumplido' : 'Diseño Insuficiente'}
+            </span>
+          </div>
+          <p className="text-sm text-slate-600">
+            El sistema debe soportar al menos {requirement} L.
+          </p>
+        </div>
+      </div>
+
+      <div className="h-64">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={data} layout="vertical">
+            <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+            <XAxis type="number" domain={[0, 150]} />
+            <YAxis dataKey="name" type="category" width={100} tick={{fontSize: 12}} />
+            <Tooltip />
+            <Bar dataKey="value" barSize={30} radius={[0, 4, 4, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+};
+
+// --- 5. Diagrama Dinámico: Optimización ---
+
+const OptimizationDiagram: React.FC<DiagramProps> = ({ isActive }) => {
+  const [iteration, setIteration] = useState(0);
+  
+  // Simulated optimization data curve
+  const data = Array.from({ length: 20 }, (_, i) => ({
+    x: i,
+    cost: 100 * Math.exp(-0.2 * i) + 20 + Math.random() * 5
+  }));
+
+  useEffect(() => {
+    if (!isActive) return;
+    const interval = setInterval(() => {
+      setIteration((prev) => (prev < 19 ? prev + 1 : 0));
+    }, 500);
+    return () => clearInterval(interval);
+  }, [isActive]);
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-12 gap-6 p-6">
+      <div className="md:col-span-4 space-y-4">
+        <div className={`p-3 rounded transition-colors ${iteration % 3 === 0 ? 'bg-blue-100 border-l-4 border-blue-500' : 'bg-slate-50'}`}>
+          <h4 className="font-bold text-sm">1. Prueba</h4>
+          <p className="text-xs text-slate-500">Generar nueva solución candidata.</p>
+        </div>
+        <div className={`p-3 rounded transition-colors ${iteration % 3 === 1 ? 'bg-yellow-100 border-l-4 border-yellow-500' : 'bg-slate-50'}`}>
+          <h4 className="font-bold text-sm">2. Evaluación</h4>
+          <p className="text-xs text-slate-500">Calcular costo o función objetivo.</p>
+        </div>
+        <div className={`p-3 rounded transition-colors ${iteration % 3 === 2 ? 'bg-green-100 border-l-4 border-green-500' : 'bg-slate-50'}`}>
+          <h4 className="font-bold text-sm">3. Mejora</h4>
+          <p className="text-xs text-slate-500">Ajustar parámetros hacia el mínimo.</p>
+        </div>
+        <div className="mt-4 pt-4 border-t">
+          <span className="text-xs font-mono uppercase text-slate-400">Iteración actual</span>
+          <div className="text-2xl font-bold text-slate-800">#{iteration}</div>
+        </div>
+      </div>
+      
+      <div className="md:col-span-8 h-64 bg-white border rounded-lg p-2">
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="x" label={{ value: 'Iteraciones', position: 'insideBottom', offset: -5 }} />
+            <YAxis label={{ value: 'Costo ($)', angle: -90, position: 'insideLeft' }} />
+            <Tooltip />
+            <Line 
+              type="monotone" 
+              dataKey="cost" 
+              stroke="#2563eb" 
+              strokeWidth={2} 
+              dot={{ r: 4 }}
+              isAnimationActive={false} 
+            />
+            <ReferenceLine x={iteration} stroke="red" strokeDasharray="3 3" />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+};
+
+// --- 6. Diagrama Dinámico: Control (Feedback Loop) ---
+
+const ControlLoopDiagram: React.FC<DiagramProps> = ({ isActive }) => {
+  return (
+    <div className="w-full h-80 bg-slate-50 relative overflow-hidden grid place-items-center">
+      <svg viewBox="0 0 600 300" className="w-full h-full">
+        <defs>
+          <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#64748b" />
+          </marker>
+        </defs>
+
+        {/* Bloques */}
+        <rect x="250" y="50" width="100" height="60" rx="4" fill="#dbeafe" stroke="#2563eb" strokeWidth="2" />
+        <text x="300" y="85" textAnchor="middle" className="text-sm font-bold fill-blue-900">PLANTA</text>
+
+        <rect x="250" y="200" width="100" height="60" rx="4" fill="#fef9c3" stroke="#ca8a04" strokeWidth="2" />
+        <text x="300" y="235" textAnchor="middle" className="text-sm font-bold fill-yellow-900">SENSOR</text>
+
+        <rect x="50" y="50" width="100" height="60" rx="4" fill="#dcfce7" stroke="#16a34a" strokeWidth="2" />
+        <text x="100" y="85" textAnchor="middle" className="text-sm font-bold fill-green-900">CONTROLADOR</text>
+
+        {/* Sumador */}
+        <circle cx="100" cy="230" r="15" fill="white" stroke="#64748b" strokeWidth="2" />
+        <text x="100" y="235" textAnchor="middle" className="text-lg font-bold fill-slate-600">∑</text>
+
+        {/* Líneas de Flujo */}
+        {/* Controlador -> Planta */}
+        <line x1="150" y1="80" x2="240" y2="80" stroke="#64748b" strokeWidth="2" markerEnd="url(#arrowhead)" />
+        <text x="200" y="70" textAnchor="middle" className="text-xs fill-slate-500">Acción (u)</text>
+
+        {/* Planta -> Salida & Sensor */}
+        <line x1="350" y1="80" x2="450" y2="80" stroke="#64748b" strokeWidth="2" markerEnd="url(#arrowhead)" />
+        <text x="400" y="70" textAnchor="middle" className="text-xs fill-slate-500">Salida (y)</text>
+        <path d="M 400 80 L 400 230 L 360 230" fill="none" stroke="#64748b" strokeWidth="2" markerEnd="url(#arrowhead)" />
+
+        {/* Sensor -> Sumador */}
+        <line x1="250" y1="230" x2="125" y2="230" stroke="#64748b" strokeWidth="2" markerEnd="url(#arrowhead)" />
+        <text x="187" y="220" textAnchor="middle" className="text-xs fill-slate-500">Medición</text>
+        
+        {/* Sumador -> Controlador */}
+        <path d="M 100 215 L 100 120" fill="none" stroke="#64748b" strokeWidth="2" markerEnd="url(#arrowhead)" />
+        <text x="110" y="170" textAnchor="start" className="text-xs fill-red-500 font-bold">Error (e)</text>
+
+        {/* Setpoint */}
+        <line x1="40" y1="230" x2="80" y2="230" stroke="#64748b" strokeWidth="2" markerEnd="url(#arrowhead)" />
+        <text x="40" y="220" textAnchor="start" className="text-xs fill-slate-500">Ref (r)</text>
+
+        {/* Animación de Señal (solo decorativa si activo) */}
+        {isActive && (
+           <circle r="4" fill="#ef4444">
+             <animateMotion 
+               dur="4s" 
+               repeatCount="indefinite"
+               path="M 100 215 L 100 80 L 250 80 M 350 80 L 400 80 L 400 230 L 250 230 M 250 230 L 115 230"
+             />
+           </circle>
+        )}
+      </svg>
+    </div>
+  );
+};
+
+// --- 7. Diagrama Estático Comparativo: Resumen ---
+
+const SummaryView: React.FC = () => {
+  const summaryData = [
+    { type: 'Simulación', goal: 'Entender/Predecir', time: 'Futuro', interaction: 'Baja' },
+    { type: 'Dimensionamiento', goal: 'Validar Requisitos', time: 'Diseño', interaction: 'Media' },
+    { type: 'Optimización', goal: 'Mejorar Rendimiento', time: 'Iterativo', interaction: 'Alta' },
+    { type: 'Control', goal: 'Mantener Estabilidad', time: 'Tiempo Real', interaction: 'Autónoma' },
+  ];
+
+  return (
+    <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-5 bg-slate-100 p-3 rounded-t-lg font-bold text-slate-700 text-sm">
+        <div className="col-span-2">Tipo</div>
+        <div>Objetivo</div>
+        <div>Tiempo</div>
+        <div>Interacción</div>
+      </div>
+      {summaryData.map((item, idx) => (
+        <div key={idx} className="grid grid-cols-5 p-3 border-b border-slate-100 text-sm hover:bg-slate-50 transition-colors items-center">
+          <div className="col-span-2 font-semibold text-blue-600 flex items-center gap-2">
+            {idx === 0 && <Activity size={16}/>}
+            {idx === 1 && <Maximize size={16}/>}
+            {idx === 2 && <Target size={16}/>}
+            {idx === 3 && <RefreshCw size={16}/>}
+            {item.type}
+          </div>
+          <div className="text-slate-600">{item.goal}</div>
+          <div className="text-slate-500 bg-slate-100 rounded px-2 py-1 text-xs w-fit">{item.time}</div>
+          <div className="text-slate-600">{item.interaction}</div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// --- Datos de la Lección ---
+
+const LESSON_CONTENT: LessonSection[] = [
+  {
+    id: 'intro',
+    title: 'Introducción a la lección',
+    shortTitle: 'Inicio',
+    description: (
+<DivCarousel>
+<p>En esta lección se muestra cómo <strong>la simulación se utiliza</strong> como una herramienta clave para <strong>analizar modelos matemáticos</strong> y apoyar la <strong>toma de decisiones</strong> técnicas y científicas, distinguiendo sus principales tipos según la finalidad del análisis.</p>
+<p>Una vez que un modelo matemático ha sido formulado, <strong>no basta con conocer sus ecuaciones</strong>: es necesario explorar su comportamiento bajo <strong>diferentes condiciones</strong>. </p>
+<p> La <strong>simulación</strong> permite realizar <strong>experimentos virtuales</strong> sobre el modelo, evitando riesgos, reduciendo costos y ahorrando tiempo. </p>
+<p> Dependiendo de lo que se desee lograr <strong>—comprender</strong>, <strong>diseñar</strong>, <strong>mejorar</strong> o <strong>regular</strong> un sistema— la simulación adopta distintos enfoques.</p>
+</DivCarousel>
+),
+    component: <InitialModelDiagram />
+  },
+  {
+    id: 'types',
+    title: 'Tipos de Simulaciones',
+    shortTitle: 'Tipos',
+    description: (
+<DivCarousel>
+<p>Se diferencian principalmente por la <strong>intención del análisis</strong>. En algunos casos se desea observar el comportamiento del sistema, en otros <strong>diseñarlo</strong>, <strong>mejorarlo</strong> o <strong>regularlo</strong>.
+  </p>
+  <p> Esta <strong>clasificación</strong> es especialmente relevante en ingeniería y ciencias aplicadas, donde los modelos sirven como <strong>apoyo directo a la planificación</strong> y a la toma de decisiones.</p>
+<div><p><strong>Aspectos que definen el tipo de simulación:</strong></p>
+<ul>
+<li>Objetivo del análisis.</li>
+<li>Tipo de resultados esperados.</li>
+<li>Nivel de intervención sobre el modelo.</li>
+</ul></div>
+
+</DivCarousel>
+),
+    component: <ProgressionDiagram />
+  },
+  {
+    id: 'simulation',
+    title: 'Simulación',
+    shortTitle: 'Simulación',
+    description: (
+<DivCarousel>
+<p>La <strong>simulación</strong>, en su forma más general, consiste en r<strong>eproducir el comportamiento de un sistema</strong> utilizando su modelo matemático y un conjunto específico de valores de entrada. 
+  <br />
+  El <strong>objetivo</strong> no es cambiar el sistema, sino<strong> entender cómo responde ante distintas condiciones</strong>.</p>
+  <div><p><strong>Características principales:</strong></p>
+<ul>
+<li>No modifica la estructura del modelo.</li>
+<li>Permite analizar escenarios hipotéticos.</li>
+<li>Se centra en la comprensión del funcionamiento del sistema.</li>
+</ul></div>
+<div><p><strong>Uso típico:</strong></p>
+<ul>
+<li>Evaluación del desempeño.</li>
+<li>Análisis de sensibilidad.</li>
+<li>Estudio de escenarios futuros.</li>
+</ul></div>
+
+</DivCarousel>
+),
+    component: <SimulationFlowDiagram  />
+  },
+  {
+    id: 'sizing',
+    title: 'Dimensionamiento',
+    shortTitle: 'Dimensionamiento',
+    description: (
+<DivCarousel>
+<p>El <strong>dimensionamiento</strong> emplea el modelo matemático para <strong>determinar valores adecuados de parámetros</strong> como tamaños, capacidades o cantidades.
+<br /> A través de simulaciones repetidas, se busca que el<strong> sistema funcione correctamente bajo ciertas condiciones</strong> deseadas.</p>
+<div><p><strong>Características principales:</strong></p>
+<ul>
+<li>Define parámetros óptimos de diseño.</li>
+<li>Parte de requisitos de operación.</li>
+<li>Usa simulaciones iterativas.</li>
+</ul></div>
+<div><p><strong>Uso típico:</strong></p>
+<ul>
+<li>Diseño de sistemas y componentes.</li>
+<li>Planeación de recursos.</li>
+<li>Evaluación de capacidad y rendimiento.</li>
+</ul></div>
+
+</DivCarousel>
+),
+    component: <SizingInteractiveDiagram />
+  },
+  {
+    id: 'optimization',
+    title: 'Optimización',
+    shortTitle: 'Optimización',
+    description: (
+<DivCarousel>
+<p>La <strong>optimización</strong> busca la <strong>mejor alternativa entre muchas posibles</strong>, según un criterio definido, como minimizar costos o maximizar eficiencia. 
+<br />El modelo matemático se simula múltiples veces mientras se ajustan variables para mejorar el valor de una función objetivo.</p>
+<div><p><strong>Características principales:</strong></p>
+<ul>
+<li>Incluye una función objetivo.</li>
+<li>Considera restricciones del sistema.</li>
+<li>Puede requerir métodos matemáticos avanzados.</li>
+</ul></div>
+<div><p><strong>Uso típico:</strong></p>
+<ul>
+<li>Minimización de costos.</li>
+<li>Maximización de beneficios o eficiencia.</li>
+<li>Mejora del desempeño global del sistema.</li>
+</ul></div>
+
+</DivCarousel>
+),
+    component: <OptimizationDiagram isActive={true} />
+  },
+  {
+    id: 'control',
+    title: 'Control Automático',
+    shortTitle: 'Control',
+    description: (
+<DivCarousel>
+<p>La simulación para control se centra en <strong>regular sistemas que cambian en el tiempo</strong>, aplicando acciones correctivas basadas en retroalimentación. 
+  <br />El objetivo es <strong>mantener el sistema cerca de un comportamiento deseado</strong>, incluso ante perturbaciones.</p>
+  <div><p><strong>Características principales:</strong></p>
+<ul>
+<li>Analiza sistemas dinámicos.</li>
+<li>Considera entradas de control y perturbaciones.</li>
+<li>Evalúa estabilidad y respuesta del sistema.</li>
+</ul></div>
+<div><p><strong>Uso típico:</strong></p>
+<ul>
+<li>Diseño de sistemas de control automático.</li>
+<li>Regulación de procesos industriales.</li>
+<li>Mantenimiento de condiciones deseadas.</li>
+</ul></div>
+
+</DivCarousel>
+),
+    component: <ControlLoopDiagram isActive={true} />
+  },
+  {
+    id: 'summary',
+    title: 'Cierre de la lección',
+    shortTitle: 'Cierre',
+    description: (
+<DivCarousel>
+<p>Los <strong>modelos matemáticos</strong> alcanzan su verdadero potencial cuando se utilizan mediante <strong>simulación</strong>.
+  </p>
+  <p> La simulación básica permite comprender el sistema; el dimensionamiento ayuda a diseñarlo; la optimización busca mejorarlo; y el control permite regular su comportamiento en el tiempo. </p>
+  <p>Elegir correctamente el tipo de simulación es fundamental para obtener resultados útiles y aplicables en la toma de decisiones científicas y técnicas.</p>
+</DivCarousel>
+),
+    component: <SummaryView />
+  }
+];
+
+// --- Componente Principal (Layout) ---
+
+const App: React.FC = () => {
+  const [activeTabId, setActiveTabId] = useState<string>(LESSON_CONTENT[0].id);
+
+  const activeSection = LESSON_CONTENT.find(s => s.id === activeTabId) || LESSON_CONTENT[0];
+
+  return (
+    // Layout Principal: CSS Grid (No Flexbox)
+    // grid-rows: Header (auto) -> Content (1fr)
+    <div className="bg-slate-100 p-4 md:p-8 font-sans text-slate-800 grid grid-rows-[auto_1fr] gap-6 max-w-7xl mx-auto">
+      
+      {/* Header Area */}
+      <header className="grid gap-2">
+        <div className="grid grid-flow-col justify-between items-center bg-white p-4 rounded-xl shadow-sm border-b border-slate-200">
+          <div className="grid grid-flow-col gap-3 items-center">
+            <div className="w-10 h-10 bg-blue-600 rounded-lg grid place-items-center text-white">
+              <Activity size={24} />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-slate-900 leading-tight">Tipos de simulaciones en modelos matemáticos</h1>
+            </div>
+          </div>
+          <div className="hidden md:block text-right">
+            <span className="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-mono">
+              v1.0.0
+            </span>
+          </div>
+        </div>
+
+        {/* Navigation Tabs (Grid Flow) */}
+        <nav className="bg-white rounded-xl shadow-sm border border-slate-200 p-1 overflow-x-auto">
+          <div className="grid grid-flow-col auto-cols-max gap-1 min-w-max">
+            {LESSON_CONTENT.map((section) => (
+              <button
+                key={section.id}
+                onClick={() => setActiveTabId(section.id)}
+                className={`
+                  px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 w-full text-center
+                  ${activeTabId === section.id 
+                    ? 'bg-blue-50 text-blue-700 shadow-sm ring-1 ring-blue-200' 
+                    : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}
+                `}
+              >
+                {section.shortTitle}
+              </button>
+            ))}
+          </div>
         </nav>
       </header>
 
-      {/* Main Content Panel Area */}
-      <main className="w-full h-full overflow-y-auto p-4 md:p-8 grid place-items-center">
-        <div className="w-full max-w-5xl h-full grid grid-rows-[auto_1fr] gap-6">
-          
-          {/* Título y Badge del Panel Activo */}
-          <div className="border-b border-slate-300 pb-4 grid grid-cols-[1fr_auto] items-center gap-4">
-            <div>
-              <h2 className="text-2xl md:text-3xl font-bold text-slate-800">
-                {sections[activeTab].title}
-              </h2>
-              <p className="text-slate-500 mt-1 flex items-center gap-2">
-                <Activity size={16} />
-                {sections[activeTab].purpose}
-              </p>
-            </div>
-            <span className={`
-              px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider border
-              ${sections[activeTab].type === 'Dinámico' 
-                ? 'bg-purple-100 text-purple-700 border-purple-200' 
-                : 'bg-blue-100 text-blue-700 border-blue-200'}
-            `}>
-              Diagrama {sections[activeTab].type}
-            </span>
-          </div>
-
-          {/* Grid de Contenido: Texto (Izq/Arriba) + Visualización (Der/Abajo) */}
-          <div className="grid grid-cols-1 md:grid-cols-[1fr_1.5fr] gap-8 h-full content-start">
-            
-            {/* Columna de Texto */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 h-fit">
-              <h3 className="text-lg font-semibold mb-4 text-slate-700 flex items-center gap-2">
-                <Minimize2 className="w-4 h-4" /> Descripción Detallada
-              </h3>
-              <p className="text-slate-600 leading-relaxed text-sm md:text-base">
-                {sections[activeTab].description}
-              </p>
-              
-              <div className="mt-6 p-4 bg-slate-50 rounded border border-slate-100">
-                <h4 className="text-xs font-bold text-slate-400 uppercase mb-2">Claves de interpretación</h4>
-                <ul className="text-sm text-slate-600 space-y-2 list-disc list-inside">
-                  <li>Observa la relación causa-efecto.</li>
-                  {sections[activeTab].type === 'Dinámico' ? (
-                    <li>Nota cómo cambia el estado con el tiempo (animación).</li>
-                  ) : (
-                    <li>Compara los estados inicial y final.</li>
-                  )}
-                </ul>
-              </div>
-            </div>
-
-            {/* Columna de Visualización */}
-            <div className="bg-white p-2 rounded-xl shadow-lg border-2 border-slate-100 grid place-items-center relative">
-              <div className="absolute top-4 right-4 text-slate-300">
-                <Maximize2 className="w-5 h-5" />
-              </div>
-              <div className="w-full p-4">
-                <ActiveComponent />
-              </div>
-              <div className="w-full bg-slate-50 p-2 text-center border-t border-slate-100 text-xs text-slate-400 italic">
-                Representación visual interactiva: {sections[activeTab].title}
-              </div>
-            </div>
-
-          </div>
-        </div>
+      {/* Main Content Area (Grid 12 cols) */}
+      <main className="grid grid-cols-1  gap-2 items-start">
+        {/* Text Panel (Left/Top) */}
+          <Card className="p-6 border-t-4 border-t-blue-500">
+            <h2 className="text-2xl font-bold text-slate-800 mb-4">{activeSection.title}</h2>
+              {activeSection.description}
+          </Card>
+                 {activeSection.component}
       </main>
     </div>
   );
 };
 
-export default Lesson3;
+export default App;

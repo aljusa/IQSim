@@ -1,763 +1,911 @@
-import React, { useState } from 'react';
-import DivCarousel from '../assets/DivCarousel';
+import React, { useState, useMemo, useRef } from 'react';
 import { 
-  Thermometer, 
-  Clock, 
-  Snowflake, 
-  Flame, 
-  Hammer, 
-  Search, 
+  BookOpen, 
   Activity, 
-  Layers, 
+  Database, 
+  Settings, 
+  GitCommit, 
   ArrowRight,
+  Layout,
+  Brain,
+  RotateCcw,
+  Calculator,
+  MousePointerClick,
+  BrainCircuit,
+  Trophy
 } from 'lucide-react';
+import { 
+  Line, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  Scatter,
+  ComposedChart
+} from 'recharts';
+import DivCarousel from '../assets/DivCarousel';
 
-// --- Tipos de Datos ---
-type TabId = 
-  | 'contexto' 
-  | 'proceso' 
-  | 'calentamiento' 
-  | 'mantenimiento' 
-  | 'enfriamiento' 
-  | 'calor' 
-  | 'comparativo' 
-  | 'integrador';
+// --- Tipos e Interfaces ---
 
 interface TabConfig {
-  id: TabId;
+  id: string;
   label: string;
   icon: React.ReactNode;
+  title: string;
+  description: React.ReactNode;
 }
 
-// --- Componentes Auxiliares ---
+// --- Componentes UI Base (Grid Based) ---
 
-// Componente para representar la estructura de granos (Microestructura)
-const Microstructure = ({ scale = 1, agitation = 0, color = "#52525b" }: { scale?: number, agitation?: number, color?: string }) => {
-  // Generamos algunos "granos" aleatorios pero deterministicos para la demo
-  const grains = [
-    { cx: 20, cy: 20, r: 15 }, { cx: 50, cy: 15, r: 12 }, { cx: 80, cy: 25, r: 18 },
-    { cx: 15, cy: 50, r: 14 }, { cx: 45, cy: 50, r: 16 }, { cx: 75, cy: 55, r: 13 },
-    { cx: 25, cy: 80, r: 15 }, { cx: 60, cy: 85, r: 17 }, { cx: 90, cy: 80, r: 10 },
+const Card = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+  <div className={`bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden ${className}`}>
+    {children}
+  </div>
+);
+
+const GridContainer = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+  <div className={`grid ${className}`}>
+    {children}
+  </div>
+);
+
+// --- Diagramas Específicos ---
+
+// 1. Diagrama Estático: Esquema General
+const GeneralSchemeDiagram = () => {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-6 bg-slate-50 rounded-lg">
+      <div className="bg-blue-50 border-2 border-blue-200 p-4 rounded-lg grid place-items-center text-center gap-2">
+        <Brain className="w-8 h-8 text-blue-600" />
+        <h3 className="font-bold text-blue-900">Modelos Teóricos</h3>
+        <p className="text-sm text-blue-700">Basados en leyes fundamentales y primeros principios.</p>
+       
+      </div>
+
+      <div className="bg-purple-50 border-2 border-purple-200 p-4 rounded-lg grid place-items-center text-center gap-2 relative">
+        <div className="absolute top-1/2 -left-3 hidden md:block text-slate-300">
+          <ArrowRight />
+        </div>
+        <Settings className="w-8 h-8 text-purple-600" />
+        <h3 className="font-bold text-purple-900">Semi-teóricos</h3>
+        <p className="text-sm text-purple-700">Estructura teórica calibrada con datos experimentales.</p>
+      
+        <div className="absolute top-1/2 -right-3 hidden md:block text-slate-300">
+          <ArrowRight />
+        </div>
+      </div>
+
+      <div className="bg-emerald-50 border-2 border-emerald-200 p-4 rounded-lg grid place-items-center text-center gap-2">
+        <Database className="w-8 h-8 text-emerald-600" />
+        <h3 className="font-bold text-emerald-900">Modelos Empíricos</h3>
+        <p className="text-sm text-emerald-700">Construidos exclusivamente a partir de observaciones.</p>
+      
+      </div>
+    </div>
+  );
+};
+
+// 2. Diagrama Dinámico: Eje Continuo
+const ContinuumDiagram = () => {
+  const [position, setPosition] = useState(50);
+
+  const getLabel = (pos: number) => {
+    if (pos < 30) return "Predominio Teórico";
+    if (pos > 70) return "Predominio de Datos";
+    return "Zona Híbrida (Semi-teórico)";
+  };
+
+  return (
+    <div className="p-8 bg-slate-50 rounded-lg grid gap-6">
+      
+      <div className="relative h-12 bg-gradient-to-r from-blue-200 via-purple-200 to-emerald-200 rounded-full grid items-center px-2">
+        <input 
+          type="range" 
+          min="0" 
+          max="100" 
+          value={position} 
+          onChange={(e) => setPosition(parseInt(e.target.value))}
+          className="absolute w-full h-full opacity-0 cursor-pointer z-20 top-0 left-0"
+        />
+        <div 
+          className="absolute h-10 w-10 bg-white shadow-lg border-2 border-slate-600 rounded-full z-10 grid place-items-center transition-all duration-75 ease-out"
+          style={{ left: `calc(${position}% - 20px)` }}
+        >
+          <Activity size={16} />
+        </div>
+        
+        {/* Labels estáticos fondo */}
+        <div className="grid grid-cols-2 w-full px-4 text-xs font-bold text-slate-500 uppercase tracking-widest pointer-events-none">
+          <div className="text-left">Alta Teoría</div>
+          <div className="text-right">Altos Datos</div>
+        </div>
+      </div>
+
+      <div className="bg-white p-4 rounded border border-slate-200 text-center shadow-sm">
+        <span className="text-lg font-bold text-slate-800">{getLabel(position)}</span>
+        <p className="text-sm text-slate-500 mt-1">
+          {position < 30 && "Se basa en ecuaciones universales (ej. Leyes de Newton)."}
+          {position > 70 && "Se basa en correlaciones estadísticas (ej. Machine Learning)."}
+          {position >= 30 && position <= 70 && "Combina estructura física con parámetros ajustables."}
+        </p>
+      </div>
+    </div>
+  );
+};
+
+// 3. Diagrama Estático: Proceso Teórico
+const TheoreticalProcessDiagram = () => {
+  return (
+    <div className="grid gap-4 p-6 bg-slate-50 rounded-lg place-items-center">
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr_auto_1fr] gap-4 items-center w-full max-w-4xl">
+        
+        {/* Step 1 */}
+        <div className="bg-white p-4 rounded border-l-4 border-blue-500 shadow-sm">
+          <div className="font-bold text-blue-800 mb-2">Leyes Fundamentales</div>
+          <p className="text-xs text-slate-600">Principios universales (Conservación de masa, energía...)</p>
+        </div>
+
+        <ArrowRight className="text-slate-400 rotate-90 md:rotate-0 justify-self-center" />
+
+        {/* Step 2 */}
+        <div className="bg-white p-4 rounded border-l-4 border-blue-500 shadow-sm">
+          <div className="font-bold text-blue-800 mb-2">Formulación Matemática</div>
+          <p className="text-xs text-slate-600">Traducción a ecuaciones diferenciales o algebraicas.</p>
+          <code className="block mt-2 text-xs bg-slate-100 p-1 rounded">f(x) = ma</code>
+        </div>
+
+        <ArrowRight className="text-slate-400 rotate-90 md:rotate-0 justify-self-center" />
+
+        {/* Step 3 */}
+        <div className="bg-white p-4 rounded border-l-4 border-blue-500 shadow-sm">
+          <div className="font-bold text-blue-800 mb-2">Predicción del Sistema</div>
+          <p className="text-xs text-slate-600">Comportamiento esperado sin necesidad de datos previos.</p>
+        </div>
+
+      </div>
+    </div>
+  );
+};
+
+// 4. Diagrama Dinámico: Calibración (Semi-teórico)
+const CalibrationDiagram = () => {
+  const [paramK, setParamK] = useState(1);
+  
+  // Datos simulados: Una curva teórica base y puntos experimentales fijos
+  const data = useMemo(() => {
+    const points = [];
+    const noise = [0.568880652677539, 0.6829687788936665, 0.7073300529276143, 0.10442483494810784, 0.8672215275772582, 0.3355065068936913, 0.7685612808596767, 0.9742194899692279, 0.5320378195422377, 0.5914672493228109]
+    for (let x = 0; x <= 10; x++) {
+      // Modelo teórico: y = k * x^1.5 (ejemplo físico simple)
+      const theoretical = paramK * Math.pow(x, 1.5);
+      // Datos experimentales "reales" (digamos que la realidad es k=2.5)
+      const experimental = 2.5 * Math.pow(x, 1.5) + (noise[x] * 5 - 2.5); // con un poco de ruido
+      
+      points.push({
+        x,
+        Teórico: theoretical,
+        Experimental: x > 0 ? experimental : 0 // Solo mostramos experimental para x > 0
+      });
+    }
+    return points;
+  }, [paramK]);
+
+  const errorScore = Math.abs(2.5 - paramK).toFixed(2);
+  const isCalibrated = Math.abs(2.5 - paramK) < 0.2;
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6 p-6 bg-slate-50 rounded-lg">
+      <div className="bg-white p-4 rounded shadow-sm border border-slate-200">
+        <h4 className="font-bold text-slate-700 mb-4 flex items-center gap-2">
+          <Settings size={18} /> Panel de Calibración
+        </h4>
+        
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-slate-600 mb-2">
+            Parámetro K (Ajuste Teórico) <p className='text-slate-400'>Ajusta el valor de k para calibrar el modelo</p>
+          </label>
+          <input 
+            type="range" 
+            min="0.5" 
+            max="5" 
+            step="0.1"
+            value={paramK} 
+            onChange={(e) => setParamK(parseFloat(e.target.value))}
+            className="w-full accent-purple-600"
+          />
+          <div className="text-right font-mono text-purple-700 font-bold mt-1">k = {paramK}</div>
+        </div>
+        <div className={`p-3 rounded text-sm border ${isCalibrated ? 'bg-green-50 border-green-200 text-green-800' : 'bg-orange-50 border-orange-200 text-orange-800'}`}>
+          
+          <div className="font-bold">Desviación: {errorScore}</div>
+          {isCalibrated ? "¡Modelo Calibrado!" : "Requiere ajuste..."}
+        </div>
+   
+        
+      </div>
+  <div className="text-sm text-slate-600 font-medium ">
+    Modelo Teórico: 
+    y = <span className="text-purple-700 font-bold">{paramK}</span> · x<sup>1.5</sup>
+  </div>
+      <div className="h-[300px] bg-white p-4 rounded border border-slate-200">
+        <ResponsiveContainer width="100%" height="100%">
+          <ComposedChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="x" />
+            <YAxis domain={[0, 100]} />
+            <Tooltip />
+            <Line type="monotone" dataKey="Teórico" stroke="#9333ea" strokeWidth={3} dot={false} />
+            <Scatter name="Experimental" dataKey="Experimental" fill="#10b981" />
+          </ComposedChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+};
+
+// 5. Diagrama Interactivo: Modelado Empírico
+const EmpiricalDiagram = () => {
+ 
+// --- TIPOS ---
+type Point = { x: number; y: number };
+type Step = 0 | 1 | 2;
+type ModelType = 'linear' | 'quadratic';
+
+interface RegressionResult {
+  type: ModelType;
+  equation: string;
+  rSquared: number;
+  predict: (x: number) => number;
+  details: {
+    linearR2: number;
+    quadraticR2: number;
+  };
+}
+  const [step, setStep] = useState<Step>(0);
+  const [points, setPoints] = useState<Point[]>([]);
+  const [regression, setRegression] = useState<RegressionResult | null>(null);
+  const [isCalculating, setIsCalculating] = useState(false);
+  const graphRef = useRef<HTMLDivElement>(null);
+
+  const GRAPH_SIZE = 300;
+
+  // --- LÓGICA MATEMÁTICA ---
+
+  // Cálculo de R^2 (Coeficiente de determinación)
+  const calculateRSquared = (points: Point[], predictFn: (x: number) => number) => {
+    const n = points.length;
+    if (n < 2) return 0;
+    
+    const meanY = points.reduce((sum, p) => sum + p.y, 0) / n;
+    const ssTot = points.reduce((sum, p) => sum + Math.pow(p.y - meanY, 2), 0);
+    const ssRes = points.reduce((sum, p) => sum + Math.pow(p.y - predictFn(p.x), 2), 0);
+    
+    return 1 - (ssRes / ssTot);
+  };
+
+  // Regresión Lineal: y = mx + b
+  const solveLinear = (pts: Point[]) => {
+    const n = pts.length;
+    let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+    pts.forEach(p => {
+      sumX += p.x; sumY += p.y; sumXY += p.x * p.y; sumXX += p.x * p.x;
+    });
+    
+    const m = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+    const b = (sumY - m * sumX) / n;
+    
+    return { 
+      m, 
+      b, 
+      predict: (x: number) => m * x + b,
+      equation: `y = ${m.toFixed(2)}x + ${b.toFixed(2)}`
+    };
+  };
+
+  // Regresión Cuadrática: y = ax^2 + bx + c
+  // Resuelve sistema 3x3 usando Cramer o eliminación simple
+  const solveQuadratic = (pts: Point[]) => {
+    const n = pts.length;
+    let s_x = 0, s_x2 = 0, s_x3 = 0, s_x4 = 0, s_y = 0, s_xy = 0, s_x2y = 0;
+    
+    pts.forEach(p => {
+      const x2 = p.x * p.x;
+      s_x += p.x;
+      s_x2 += x2;
+      s_x3 += x2 * p.x;
+      s_x4 += x2 * x2;
+      s_y += p.y;
+      s_xy += p.x * p.y;
+      s_x2y += x2 * p.y;
+    });
+
+    // Matriz del sistema normal:
+    // [ n      s_x    s_x2 ] [ c ]   [ s_y   ]
+    // [ s_x    s_x2   s_x3 ] [ b ] = [ s_xy  ]
+    // [ s_x2   s_x3   s_x4 ] [ a ]   [ s_x2y ]
+    
+    // Solución simplificada manual para 3x3
+    const D = n * (s_x2 * s_x4 - s_x3 * s_x3) - s_x * (s_x * s_x4 - s_x3 * s_x2) + s_x2 * (s_x * s_x3 - s_x2 * s_x2);
+    
+    if (Math.abs(D) < 1e-9) return null; // Matriz singular (colinealidad perfecta o pocos puntos)
+
+    
+    // Matriz A:
+    // [ s_x4  s_x3  s_x2 ] [ a ]   [ s_x2y ]
+    // [ s_x3  s_x2  s_x1 ] [ b ] = [ s_xy  ]
+    // [ s_x2  s_x1  n    ] [ c ]   [ s_y   ]
+
+    const m11 = s_x4, m12 = s_x3, m13 = s_x2;
+    const m21 = s_x3, m22 = s_x2, m23 = s_x;
+    const m31 = s_x2, m32 = s_x,  m33 = n;
+    
+    const det = m11*(m22*m33 - m23*m32) - m12*(m21*m33 - m23*m31) + m13*(m21*m32 - m22*m31);
+    
+    if (Math.abs(det) < 1e-9) return null;
+
+    const detA = s_x2y*(m22*m33 - m23*m32) - m12*(s_xy*m33 - s_y*m23) + m13*(s_xy*m32 - s_y*m22);
+    const detB = m11*(s_xy*m33 - s_y*m23) - s_x2y*(m21*m33 - m23*m31) + m13*(m21*s_y - s_xy*m31);
+    const detC = m11*(m22*s_y - s_xy*m32) - m12*(m21*s_y - s_xy*m31) + s_x2y*(m21*m32 - m22*m31);
+
+    const resA = detA / det;
+    const resB = detB / det;
+    const resC = detC / det;
+
+    const op = resB >= 0 ? '+' : '-';
+    const op2 = resC >= 0 ? '+' : '-';
+
+    return {
+      predict: (x: number) => resA*x*x + resB*x + resC,
+      equation: `y = ${resA.toFixed(3)}x² ${op} ${Math.abs(resB).toFixed(2)}x ${op2} ${Math.abs(resC).toFixed(2)}`
+    };
+  };
+
+  // --- MANEJADORES ---
+
+  const handleGraphClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (step !== 0) return;
+    const rect = graphRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const x = ((e.clientX - rect.left) / GRAPH_SIZE) * 100;
+    const y = 100 - (((e.clientY - rect.top) / GRAPH_SIZE) * 100);
+    setPoints([...points, { x, y }]);
+  };
+
+  const calculateBestModel = () => {
+    setIsCalculating(true);
+    
+    setTimeout(() => {
+      const linear = solveLinear(points);
+      const linearR2 = calculateRSquared(points, linear.predict);
+      
+      let finalModel: RegressionResult;
+      
+      // Intentar cuadrática si hay suficientes puntos
+      const quadratic = points.length >= 3 ? solveQuadratic(points) : null;
+      let quadraticR2 = -1;
+
+      if (quadratic) {
+        quadraticR2 = calculateRSquared(points, quadratic.predict);
+        
+        // Criterio de selección: R^2 ajustado o simple
+        // Usamos simple aquí. Si la cuadrática mejora el R2 por al menos un 2% (0.02), la preferimos.
+        // (Penalización ligera por complejidad para evitar overfitting trivial)
+        if (quadraticR2 > linearR2 + 0.02) {
+           finalModel = {
+             type: 'quadratic',
+             equation: quadratic.equation,
+             rSquared: quadraticR2,
+             predict: quadratic.predict,
+             details: { linearR2, quadraticR2 }
+           };
+        } else {
+          finalModel = {
+            type: 'linear',
+            equation: linear.equation,
+            rSquared: linearR2,
+            predict: linear.predict,
+            details: { linearR2, quadraticR2 }
+          };
+        }
+      } else {
+        // Fallback a lineal
+        finalModel = {
+          type: 'linear',
+          equation: linear.equation,
+          rSquared: linearR2,
+          predict: linear.predict,
+          details: { linearR2, quadraticR2: 0 }
+        };
+      }
+
+      setRegression(finalModel);
+      setStep(2);
+      setIsCalculating(false);
+    }, 1500);
+  };
+
+  const reset = () => {
+    setPoints([]);
+    setStep(0);
+    setRegression(null);
+  };
+
+  // --- RENDERIZADO GRÁFICO ---
+
+  const renderModelCurve = () => {
+    if (!regression) return null;
+
+    // Generar path SVG
+    let d = "";
+    for (let i = 0; i <= 100; i+=2) {
+      const x = i;
+      const y = regression.predict(x);
+      
+      // Convertir a coordenadas SVG
+      const svgX = (x / 100) * GRAPH_SIZE;
+      const svgY = GRAPH_SIZE - (y / 100 * GRAPH_SIZE); // Invertir Y
+
+      if (i === 0) d += `M ${svgX} ${svgY}`;
+      else d += ` L ${svgX} ${svgY}`;
+    }
+
+    return (
+      <path 
+        d={d}
+        stroke={regression.type === 'linear' ? '#10b981' : '#8b5cf6'} 
+        strokeWidth="3"
+        fill="none"
+        strokeDasharray={regression.type === 'linear' ? "5,5" : "0"}
+        className="animate-pulse"
+      />
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 p-4 md:p-8 font-sans text-slate-800">
+      <div className="max-w-5xl mx-auto">
+        
+        <header className="mb-8 text-center">
+          <h1 className="text-3xl font-bold text-slate-900 mb-2">Selección Empírica de Modelos</h1>
+          <p className="text-slate-600">Recolecta datos, evalúa algoritmos y descubre el mejor modelo matemático.</p>
+        </header>
+
+        {/* Pasos */}
+        <div className="flex justify-between items-center mb-8 relative px-4">
+          <div className="absolute top-1/2 left-0 w-full h-1 bg-slate-200 -z-10 transform -translate-y-1/2"></div>
+          {[
+            { icon: Database, label: "Datos" },
+            { icon: BrainCircuit, label: "Evaluación" },
+            { icon: Trophy, label: "Mejor Modelo" }
+          ].map((s, idx) => (
+            <div key={idx} className={`flex flex-col items-center bg-slate-50 px-4 transition-colors duration-500 ${step >= idx ? 'text-blue-600' : 'text-slate-400'}`}>
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center border-2 mb-2 ${step >= idx ? 'bg-blue-100 border-blue-600 shadow-md' : 'bg-white border-slate-300'}`}>
+                <s.icon size={20} />
+              </div>
+              <span className="text-sm font-bold">{s.label}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          
+          {/* Gráfico */}
+          <div className="bg-white p-6 rounded-2xl shadow-lg border border-slate-100 flex flex-col items-center justify-center">
+            <h3 className="text-lg font-semibold mb-4 w-full flex justify-between items-center">
+              <span>Espacio Experimental</span>
+              <span className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-full font-mono">
+                n = {points.length}
+              </span>
+            </h3>
+            
+            <div 
+              ref={graphRef}
+              className={`relative bg-slate-50 border-2 border-slate-200 rounded-lg overflow-hidden transition-all duration-300 ${step === 0 ? 'hover:border-blue-400 cursor-crosshair' : 'cursor-default'}`}
+              style={{ width: GRAPH_SIZE, height: GRAPH_SIZE }}
+              onClick={handleGraphClick}
+            >
+              <svg width="100%" height="100%" className="absolute inset-0 pointer-events-none z-10">
+                <defs>
+                  <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
+                    <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#e2e8f0" strokeWidth="1"/>
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#grid)" />
+                <line x1="0" y1={GRAPH_SIZE} x2={GRAPH_SIZE} y2={GRAPH_SIZE} stroke="#94a3b8" strokeWidth="4" />
+                <line x1="0" y1="0" x2="0" y2={GRAPH_SIZE} stroke="#94a3b8" strokeWidth="4" />
+
+                {step === 2 && renderModelCurve()}
+              </svg>
+
+              {points.map((p, i) => (
+                <div
+                  key={i}
+                  className="absolute w-3 h-3 bg-blue-600 rounded-full shadow-sm transform -translate-x-1/2 -translate-y-1/2 z-20"
+                  style={{ 
+                    left: `${(p.x / 100) * GRAPH_SIZE}px`, 
+                    top: `${GRAPH_SIZE - (p.y / 100) * GRAPH_SIZE}px` 
+                  }}
+                />
+              ))}
+
+              {step === 0 && points.length === 0 && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-60">
+                  <div className="text-center bg-white/80 p-4 rounded-xl backdrop-blur-sm">
+                    <MousePointerClick className="mx-auto mb-2 text-blue-500" size={32} />
+                    <p className="text-sm font-medium text-slate-600">Haz clic en varios lugares<br/>para añadir datos</p>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+             <div className="mt-4 flex justify-between w-full max-w-[300px] text-xs text-slate-400 font-mono">
+                <span>0</span>
+                <span>Eje X (Variable Independiente)</span>
+                <span>100</span>
+             </div>
+          </div>
+
+          {/* Panel Lógico */}
+          <div className="flex flex-col justify-center">
+            
+            {step === 0 && (
+              <div className="bg-white p-6 rounded-2xl shadow-lg border-l-4 border-blue-500 animate-in fade-in slide-in-from-right-8 duration-500">
+                <h2 className="text-xl font-bold text-slate-800 mb-3">1. Recolección de Datos</h2>
+                <p className="text-slate-600 mb-6 leading-relaxed">
+                  Para que el algoritmo decida si el fenómeno es lineal o curvo (cuadrático), necesita datos variados. 
+                  <br/><br/>
+                  Intenta dibujar una forma de <strong>"U"</strong> o una <strong>línea recta</strong> con tus clics para ver cómo reacciona.
+                </p>
+                
+                <button 
+                  onClick={() => setStep(1)}
+                  disabled={points.length < 3}
+                  className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 disabled:text-slate-400 text-white rounded-lg font-bold transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg disabled:shadow-none"
+                >
+                  Analizar Datos <ArrowRight size={18} />
+                </button>
+                {points.length > 0 && points.length < 3 && (
+                  <p className="text-xs text-center mt-2 text-amber-600 font-medium">
+                    Necesitas al menos 3 puntos para evaluar curvatura.
+                  </p>
+                )}
+              </div>
+            )}
+
+            {step === 1 && (
+              <div className="bg-white p-6 rounded-2xl shadow-lg border-l-4 border-indigo-500 animate-in fade-in slide-in-from-right-8 duration-500">
+                <h2 className="text-xl font-bold text-slate-800 mb-3">2. Evaluación de Modelos</h2>
+                <p className="text-slate-600 mb-4">
+                  El sistema ejecutará dos algoritmos simultáneamente y comparará su eficacia:
+                </p>
+
+                <div className="space-y-3 mb-6">
+                  <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
+                    <div className="w-8 h-8 rounded bg-green-100 text-green-700 flex items-center justify-center font-bold text-xs">x¹</div>
+                    <div>
+                      <div className="font-semibold text-sm text-slate-700">Regresión Lineal</div>
+                      <div className="text-xs text-slate-500">Busca tendencias simples y constantes.</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
+                    <div className="w-8 h-8 rounded bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-xs">x²</div>
+                    <div>
+                      <div className="font-semibold text-sm text-slate-700">Regresión Cuadrática</div>
+                      <div className="text-xs text-slate-500">Busca curvas, aceleración o puntos de retorno.</div>
+                    </div>
+                  </div>
+                </div>
+
+                <button 
+                  onClick={calculateBestModel}
+                  disabled={isCalculating}
+                  className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold transition-all flex items-center justify-center gap-2 shadow-lg"
+                >
+                  {isCalculating ? (
+                    <span className="flex items-center gap-2">
+                      <BrainCircuit className="animate-pulse" /> Evaluando ajuste (R²)...
+                    </span>
+                  ) : (
+                    <>Ejecutar Evaluación Competitiva <Calculator size={18} /></>
+                  )}
+                </button>
+              </div>
+            )}
+
+            {step === 2 && regression && (
+              <div className="bg-white p-6 rounded-2xl shadow-lg border-l-4 border-emerald-500 animate-in fade-in slide-in-from-right-8 duration-500">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-bold text-slate-800">3. Modelo Ganador</h2>
+                  <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${regression.type === 'linear' ? 'bg-green-100 text-green-700' : 'bg-purple-100 text-purple-700'}`}>
+                    {regression.type === 'linear' ? 'Lineal' : 'Cuadrático'}
+                  </span>
+                </div>
+
+                <div className="bg-slate-900 text-emerald-400 p-5 rounded-xl font-mono text-center text-lg mb-6 shadow-inner overflow-hidden">
+                  {regression.equation}
+                </div>
+
+                {/* Tabla de Comparación */}
+                <div className="bg-slate-50 rounded-xl p-4 mb-6">
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Reporte de Ajuste (R²)</h4>
+                  <div className="space-y-2">
+                    {/* Barra Lineal */}
+                    <div className="flex items-center text-sm">
+                      <span className="w-20 font-medium text-slate-600">Lineal</span>
+                      <div className="flex-1 h-3 bg-slate-200 rounded-full overflow-hidden mx-2">
+                        <div 
+                          className="h-full bg-green-500 transition-all duration-1000" 
+                          style={{ width: `${Math.max(0, regression.details.linearR2 * 100)}%` }}
+                        />
+                      </div>
+                      <span className="w-12 text-right font-mono">{regression.details.linearR2.toFixed(2)}</span>
+                    </div>
+
+                    {/* Barra Cuadrática */}
+                    <div className="flex items-center text-sm">
+                      <span className="w-20 font-medium text-slate-600">Cuadrático</span>
+                      <div className="flex-1 h-3 bg-slate-200 rounded-full overflow-hidden mx-2">
+                        <div 
+                          className="h-full bg-purple-500 transition-all duration-1000" 
+                          style={{ width: `${Math.max(0, regression.details.quadraticR2 * 100)}%` }}
+                        />
+                      </div>
+                      <span className="w-12 text-right font-mono">{regression.details.quadraticR2.toFixed(2)}</span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-slate-400 mt-3 text-center italic">
+                    El valor R² indica qué tan bien explica el modelo los datos (cercano a 1.00 es mejor).
+                  </p>
+                </div>
+
+                <button 
+                  onClick={reset}
+                  className="w-full py-3 border-2 border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-600 rounded-lg font-semibold transition-all flex items-center justify-center gap-2"
+                >
+                  Nuevo Experimento <RotateCcw size={18} />
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// 6. Tabla Comparativa
+const ComparisonTable = () => {
+  const rows = [
+    { type: "Teórico", base: "Leyes Físicas / Primeros Principios", data: "Validación posterior", pros: "Generalizable, explica causas", cons: "Difícil en sistemas complejos" },
+    { type: "Semi-teórico", base: "Estructura física + Parámetros", data: "Calibración de parámetros", pros: "Equilibrio precisión/interpretabilidad", cons: "Requiere datos de buena calidad" },
+    { type: "Empírico", base: "Correlaciones Matemáticas", data: "Esencia del modelo (Input principal)", pros: "Fácil construcción si hay datos", cons: "Caja negra, no explica 'por qué'" },
   ];
 
   return (
-    <svg viewBox="0 0 100 100" className="w-full h-full overflow-visible">
-      <defs>
-        <pattern id="grainPattern" width="10" height="10" patternUnits="userSpaceOnUse">
-          <path d="M0 10L10 0M-2 2L2 -2M8 12L12 8" stroke={color} strokeWidth="0.5" opacity="0.5"/>
-        </pattern>
-      </defs>
-      <rect x="0" y="0" width="100" height="100" fill="none" stroke={color} strokeWidth="2" />
-      {grains.map((g, i) => (
-        <circle 
-          key={i} 
-          cx={g.cx} 
-          cy={g.cy} 
-          r={g.r * scale} 
-          fill="url(#grainPattern)" 
-          stroke={color} 
-          strokeWidth="1"
-          style={{
-            transition: 'all 0.5s ease',
-            transformOrigin: `${g.cx}px ${g.cy}px`,
-            animation: agitation > 0 ? `vibrate ${1.1 - agitation}s infinite` : 'none'
-          }}
-        />
-      ))}
-      <style>{`
-        @keyframes vibrate {
-          0% { transform: translate(0, 0) scale(1); }
-          25% { transform: translate(-1px, 1px) scale(1.02); }
-          50% { transform: translate(0, -1px) scale(1); }
-          75% { transform: translate(1px, 1px) scale(0.98); }
-          100% { transform: translate(0, 0) scale(1); }
-        }
-      `}</style>
-    </svg>
-  );
-};
-
-// --- Componentes de Paneles ---
-
-const PanelContexto = () => (
-  <div className="space-y-6 animate-in fade-in zoom-in duration-500">
-    <div className="bg-white p-6 rounded-xl shadow-md border border-slate-200">
-      <h3 className="text-xl font-bold text-slate-800 mb-2">Introducción</h3>
-      
-        <DivCarousel>
-             <div>
-        Los <strong>tratamientos térmicos</strong> son una herramienta fundamental en la ingeniería de materiales, ya que mediante el control del <strong>calentamiento</strong> y <strong>enfriamiento</strong> permiten modificar la <strong>estructura interna</strong> de los metales para mejorar sus <strong>propiedades</strong>, sin cambiar su forma ni su composición química global.
-         </div>
-         <div>
-        En esta lección se presenta una visión general de <strong>qué son los tratamientos térmicos</strong>, <strong>por qué se utilizan</strong> y<strong> cuáles son sus características principales</strong>, sentando las bases conceptuales para el estudio detallado de sus fundamentos y aplicaciones en las siguientes lecciones.
-      </div>
-        </DivCarousel>
-      
-      <div className="flex flex-col md:flex-row items-center justify-around gap-8">
-        {/* Antes */}
-        <div className="text-center group">
-          <div className="w-40 h-40 bg-slate-200 rounded-lg border-4 border-slate-400 relative overflow-hidden flex items-center justify-center mb-3 transition-transform group-hover:scale-105">
-            <Microstructure scale={1.2} color="#475569" />
-            <div className="absolute inset-0 bg-slate-900/10 pointer-events-none"></div>
-          </div>
-          <span className="font-semibold text-slate-700">Antes del Tratamiento</span>
-          <p className="text-xs text-slate-500">Grano grande, estructura blanda</p>
-        </div>
-
-        <ArrowRight className="w-10 h-10 text-blue-500 hidden md:block" />
-
-        {/* Después */}
-        <div className="text-center group">
-          <div className="w-40 h-40 bg-slate-200 rounded-lg border-4 border-slate-400 relative overflow-hidden flex items-center justify-center mb-3 transition-transform group-hover:scale-105 shadow-[0_0_15px_rgba(59,130,246,0.5)]">
-            <Microstructure scale={0.6} color="#0f172a" />
-          </div>
-          <span className="font-semibold text-blue-700">Después del Tratamiento</span>
-          <p className="text-xs text-slate-500">Grano fino, estructura dura</p>
-        </div>
-      </div>
-      
-      
-    </div>
-  </div>
-);
-
-const PanelProceso = () => (
-  <div className="space-y-6 animate-in slide-in-from-right-10 duration-500">
-    <div className="bg-white p-6 rounded-xl shadow-md border border-slate-200">
-      <h3 className="text-xl font-bold text-slate-800 mb-4">¿Qué se entiende por tratamiento térmico?</h3>
-      <DivCarousel>
-         <p>
-        Un tratamiento térmico es un proceso industrial que consiste en <strong>calentar</strong> un material metálico hasta una temperatura determinada, <strong>mantenerlo</strong> durante un tiempo específico y posteriormente <strong>enfriarlo</strong> bajo condiciones controladas.
-        </p>
-        <p>El objetivo principal es <strong>modificar la microestructura</strong> del metal para obtener propiedades mecánicas y físicas deseadas, como mayor dureza, resistencia, ductilidad o estabilidad dimensional.</p>
-        <div> <strong>Aspectos clave que lo definen:</strong>
-        <ul>
-          <li>No se busca fundir el material.</li>
-          <li>La forma y dimensiones de la pieza se conservan.</li>
-          <li>Los cambios ocurren a nivel interno, en la estructura del metal.</li>
-        </ul></div>
-       
-     
-      </DivCarousel>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
-        {/* Línea conectora (Desktop) */}
-        <div className="hidden md:block absolute top-12 left-0 right-0 h-1 bg-slate-200 -z-10 transform translate-y-1/2"></div>
-
-        {/* Fase 1 */}
-        <div className="flex flex-col items-center text-center bg-white p-4">
-          <div className="w-24 h-24 rounded-full bg-red-100 flex items-center justify-center mb-4 border-4 border-white shadow-lg">
-            <Flame className="w-10 h-10 text-red-500 animate-pulse" />
-          </div>
-          <h4 className="font-bold text-lg text-slate-800">1. Calentamiento</h4>
-          <p className="text-sm text-slate-500 mt-2">Elevar la temperatura hasta el punto de austenización.</p>
-        </div>
-
-        {/* Fase 2 */}
-        <div className="flex flex-col items-center text-center bg-white p-4">
-          <div className="w-24 h-24 rounded-full bg-orange-100 flex items-center justify-center mb-4 border-4 border-white shadow-lg">
-            <Clock className="w-10 h-10 text-orange-500" />
-          </div>
-          <h4 className="font-bold text-lg text-slate-800">2. Mantenimiento</h4>
-          <p className="text-sm text-slate-500 mt-2">Homogeneizar la temperatura en toda la pieza.</p>
-        </div>
-
-        {/* Fase 3 */}
-        <div className="flex flex-col items-center text-center bg-white p-4">
-          <div className="w-24 h-24 rounded-full bg-blue-100 flex items-center justify-center mb-4 border-4 border-white shadow-lg">
-            <Snowflake className="w-10 h-10 text-blue-500" />
-          </div>
-          <h4 className="font-bold text-lg text-slate-800">3. Enfriamiento</h4>
-          <p className="text-sm text-slate-500 mt-2">Controlar la velocidad de bajada para fijar la estructura.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-);
-
-const PanelCalentamiento = () => (
-  <div className="space-y-6 animate-in fade-in duration-700">
-    <div className="bg-white p-6 rounded-xl shadow-md border border-slate-200">
-      <h3 className="text-xl font-bold text-slate-800 mb-2">Elementos fundamentales de un tratamiento térmico</h3>
-      <DivCarousel>
-        <div><p>El material se <strong>eleva progresivamente</strong> hasta una <strong>temperatura previamente establecida</strong>, la cual depende del <strong>tipo de metal</strong> y del <strong>objetivo del tratamiento</strong>.</p>
-        
-        <ul>
-          <li>El calentamiento debe ser <strong>controlado</strong>.</li>
-          <li>Un calentamiento inadecuado puede generar <strong>tensiones internas</strong>.</li>
-          <li>La temperatura <strong>define qué transformaciones</strong> internas pueden ocurrir.</li>
-        </ul></div>
-        
-      </DivCarousel>
-      
-     <div className="w-full max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-lg border border-slate-100">
-     
-
-      <div className="relative h-64 w-full">
-        {/* Etiquetas de Ejes */}
-        <span className="absolute -left-24 top-1/2 -translate-y-1/2 -rotate-90 text-xs font-semibold text-slate-500 tracking-wider">
-          Temperatura (°C)
-        </span>
-        <span className="absolute bottom-[-20px] left-1/2 -translate-x-1/2 text-xs font-semibold text-slate-500 tracking-wider">
-          Tiempo (t)
-        </span>
-
-        {/* Contenedor Gráfico */}
-        <div className="h-full w-full relative">
-          
-          {/* Grid de fondo (Líneas horizontales) */}
-          <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="w-full h-px bg-slate-100 flex items-center">
-                <span className="text-[10px]  -ml-6 w-4 text-right">
-                  {850 - i * 25}
-                </span>
-              </div>
-            ))}
-          </div>
-
-          {/* SVG Principal */}
-          <svg 
-            className="w-full h-full overflow-visible" 
-            viewBox="0 0 300 200" 
-            preserveAspectRatio="none"
-          >
-            <defs>
-              {/* Gradiente para el relleno */}
-              <linearGradient id="heatGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#ef4444" stopOpacity="0.4" />
-                <stop offset="100%" stopColor="#ef4444" stopOpacity="0" />
-              </linearGradient>
-              
-              {/* Filtro de brillo (Glow) */}
-              <filter id="glow">
-                <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
-                <feMerge>
-                  <feMergeNode in="coloredBlur"/>
-                  <feMergeNode in="SourceGraphic"/>
-                </feMerge>
-              </filter>
-            </defs>
-
-            {/* Area bajo la curva (Relleno) */}
-            <path 
-              d="M 0 200 C 50 200, 120 50, 300 20 L 300 200 L 0 200 Z" 
-              fill="url(#heatGradient)" 
-              className="opacity-0 animate-[fadeIn_2s_ease-out_0.5s_forwards]"
-            />
-
-            {/* Línea de la curva (Animada) */}
-            <path 
-              d="M 0 200 C 50 200, 120 50, 300 20" 
-              fill="none" 
-              stroke="#ef4444" 
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeDasharray="400"
-              strokeDashoffset="400"
-              filter="url(#glow)"
-              className="animate-[draw_2.5s_cubic-bezier(0.4,0,0.2,1)_forwards]"
-            />
-
-            {/* Puntos de interés interactivos (Tooltips visuales) */}
-            <g className="opacity-0 animate-[appear_0.5s_ease-out_2s_forwards]">
-                {/* Punto Final */}
-                <circle cx="300" cy="20" r="4" fill="white" stroke="#ef4444" strokeWidth="2" />
-                {/* Etiqueta flotante */}
-                <foreignObject x="220" y="25" width="100" height="50">
-                    <div className="bg-red-50 text-red-600 text-[10px] font-bold px-2 py-1 rounded shadow-sm border border-red-100 text-center">
-                        Máx. Energía
-                    </div>
-                </foreignObject>
-            </g>
-          </svg>
-        </div>
-      </div>
-
-      <style>{`
-        @keyframes draw {
-          to { stroke-dashoffset: 0; }
-        }
-        @keyframes fadeIn {
-          to { opacity: 1; }
-        }
-        @keyframes appear {
-          to { opacity: 1; transform: translateY(0); }
-          from { opacity: 0; transform: translateY(5px); }
-        }
-      `}</style>
-    </div>
-    </div>
-  </div>
-);
-
-const PanelMantenimiento = () => (
-  <div className="space-y-6 animate-in slide-in-from-bottom-5 duration-500">
-    <div className="bg-white p-6 rounded-xl shadow-md border border-slate-200">
-      <h3 className="text-xl font-bold text-slate-800 mb-2">Mantenimiento Térmico</h3>
-      <DivCarousel>
-        <div>
-        Una vez alcanzada la temperatura objetivo, el material se mantiene durante un <strong>tiempo determinado</strong> para permitir que los cambios internos ocurran de manera uniforme.
-        <br /><br />
-        <ul>
-          <li>Asegura <strong>homogeneidad</strong> en toda la pieza.</li>
-          <li>El tiempo <strong>depende del tamaño y del tipo de metal</strong>.</li>
-          <li>Un mantenimiento <strong>insuficiente</strong> genera transformaciones <strong>incompletas</strong>.</li>
-        </ul>
-      </div>
-
-      </DivCarousel>
-
-    <div className="relative h-80 bg-slate-50 rounded-xl border border-slate-200 shadow-sm overflow-hidden font-sans">
- 
-
-  <div className="absolute inset-0 flex items-center justify-center pt-8 pr-4 pb-8 pl-10">
-    <svg viewBox="0 0 400 200" className="w-full h-full overflow-visible">
-      <defs>
-        {/* Gradiente para el área bajo la curva */}
-        <linearGradient id="heatGradient" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0%" stopColor="#f97316" stopOpacity="0.2" />
-          <stop offset="100%" stopColor="#f97316" stopOpacity="0" />
-        </linearGradient>
-        
-        {/* Patrón de cuadrícula */}
-        <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-          <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#e2e8f0" strokeWidth="1" />
-        </pattern>
-        
-        {/* Filtro de sombra para la línea */}
-        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur stdDeviation="2" result="blur" />
-          <feComposite in="SourceGraphic" in2="blur" operator="over" />
-        </filter>
-      </defs>
-
-      {/* Fondo de cuadrícula */}
-      <rect x="0" y="0" width="400" height="180" fill="url(#grid)" />
-
-      {/* Ejes */}
-      <line x1="0" y1="180" x2="0" y2="0" stroke="#94a3b8" strokeWidth="2" markerEnd="url(#arrow)" />
-      <line x1="0" y1="180" x2="400" y2="180" stroke="#94a3b8" strokeWidth="2" />
-      
-      {/* Etiquetas de Ejes */}
-      <text x="-30" y="130" textAnchor="end" fontSize="10" fill="#64748b" style={{writingMode: "vertical-lr", textOrientation: "sideways"}}>Temperatura (°C)</text>
-      <text x="390" y="195" textAnchor="end" fontSize="10" fill="#64748b">Tiempo (min)</text>
-
-      {/* Ticks del eje Y */}
-      <text x="-5" y="50" textAnchor="end" fontSize="9" fill="#94a3b8">850°</text>
-      <text x="-5" y="180" textAnchor="end" fontSize="9" fill="#94a3b8">20°</text>
-
-      {/* Área de Mantenimiento (Highlight) */}
-      <rect x="80" y="20" width="170" height="160" fill="url(#heatGradient)" />
-      <line x1="80" y1="50" x2="80" y2="180" stroke="#f97316" strokeWidth="1" strokeDasharray="4" opacity="0.5" />
-      <line x1="250" y1="50" x2="250" y2="180" stroke="#f97316" strokeWidth="1" strokeDasharray="4" opacity="0.5" />
-
-      {/* La Curva Principal (Combinada y suavizada) 
-          M 0 180 (Inicio) -> Q 40 180 80 50 (Calentamiento) -> L 250 50 (Meseta) -> Q 300 50 350 150 (Enfriamiento suave)
-      */}
-      <path 
-        d="M 0 180 C 30 180, 50 50, 80 50 L 250 50 Q 300 50 350 120" 
-        fill="none" 
-        stroke="#f97316" 
-        strokeWidth="3" 
-        strokeLinecap="round"
-        filter="url(#glow)"
-      />
-
-      {/* Etiqueta Flotante de la Fase */}
-      <g transform="translate(165, 30)">
-        <rect x="-60" y="-12" width="120" height="20" rx="10" fill="#fff" stroke="#fdba74" strokeWidth="1" />
-        <text x="0" y="2" textAnchor="middle" fill="#c2410c" fontSize="10" fontWeight="bold">Austenización (Holding)</text>
-      </g>
-
-      {/* Visualización de la Estructura de Granos (Metáfora visual) */}
-      <g transform="translate(0, 10)">
-        {/* Inicio: Estructura mixta/caótica */}
-        <g opacity="0.6">
-            <circle cx="100" cy="140" r="6" fill="#fb923c" />
-            <circle cx="92" cy="132" r="4" fill="#fb923c" />
-            <circle cx="108" cy="135" r="3" fill="#fb923c" />
-            <text x="100" y="160" textAnchor="middle" fontSize="8" fill="#64748b">Inicio</text>
-        </g>
-        
-        {/* Medio: Transición */}
-        <g opacity="0.8">
-             <path d="M 125 140 L 145 140" stroke="#cbd5e1" strokeWidth="1" strokeDasharray="2" /> {/* Flecha conectora */}
-        </g>
-
-        {/* Fin: Estructura Homogénea (Uniforme) */}
-        <g opacity="1">
-            <circle cx="230" cy="140" r="8" fill="#f97316" />
-            <circle cx="215" cy="140" r="8" fill="#f97316" />
-            <circle cx="245" cy="140" r="8" fill="#f97316" />
-            
-            {/* Indicador de éxito */}
-            <circle cx="260" cy="130" r="4" fill="#22c55e" stroke="white" strokeWidth="1"/>
-            <path d="M 258 130 L 259 132 L 262 128" stroke="white" strokeWidth="1" fill="none"/>
-            
-            <text x="230" y="160" textAnchor="middle" fontSize="8" fill="#64748b" fontWeight="bold">Homogénea</text>
-        </g>
-      </g>
-      
-      {/* Indicador de tiempo */}
-      <text x="165" y="100" textAnchor="middle" fill="#94a3b8" fontSize="9" fontStyle="italic">t = x min</text>
-
-    </svg>
-  </div>
-</div>
-    </div>
-  </div>
-);
-
-const PanelEnfriamiento = () => (
-  <div className="space-y-6 animate-in fade-in zoom-in duration-500">
-    <div className="bg-white p-6 rounded-xl shadow-md border border-slate-200">
-      <h3 className="text-xl font-bold text-slate-800 mb-2">Enfriamiento</h3>
-    <DivCarousel>
-      <div>
-        El enfriamiento se realiza bajo condiciones controladas y puede ser lento, moderado o rápido, utilizando distintos medios.
-        <br /><br />
-        <ul>
-          <li><strong>Aire</strong>: enfriamiento <strong>lento</strong>.</li>
-          <li><strong>Aceite</strong>: enfriamiento <strong>moderado</strong>.</li>
-          <li><strong>Agua</strong>: enfriamiento <strong>rápido</strong>.</li>
-        </ul>
-        <br />
-        La <strong>velocidad de enfriamiento</strong> influye directamente en la <strong>microestructura final</strong> y, por tanto, en las propiedades del metal.
-      </div>
-    </DivCarousel>
-
-      <div className="h-72 w-full rounded-lg shadow-inner relative p-4 overflow-hidden">
-        {/* Ejes Blancos */}
-        <div className="absolute left-8 bottom-8 top-4 w-0.5 bg-slate-600"></div>
-        <div className="absolute left-8 bottom-8 right-4 h-0.5 bg-slate-600"></div>
-        <span className="absolute top-4 left-10 text-xs text-slate-400">Temp</span>
-        <span className="absolute bottom-4 right-4 text-xs text-slate-400">Tiempo</span>
-        <svg className="w-full h-full" viewBox="0 0 400 250" preserveAspectRatio="none">
-      
-      {/* 1. GRID (Cuadrícula tenue oscura) y TEMPERATURAS CRÍTICAS */}
-      <defs>
-        <pattern id="grid-light" width="40" height="40" patternUnits="userSpaceOnUse">
-          
-        </pattern>
-      </defs>
-      <rect width="100%" height="100%" fill="url(#grid-light)" />
-      
-      {/* Línea A1 (Temperatura eutectoide aprox) - Gris medio */}
-      <line x1="40" y1="60" x2="400" y2="60" stroke="#94a3b8" strokeWidth="1.5" strokeDasharray="4 4" opacity="0.6" />
-      <text x="45" y="55" fill="#64748b" fontSize="10" fontWeight="bold">A1 (727°C)</text>
-      
-      {/* Línea Ms (Inicio Martensita) - Gris medio */}
-      <line x1="40" y1="200" x2="400" y2="200" stroke="#94a3b8" strokeWidth="1.5" strokeDasharray="4 4" opacity="0.6" />
-      <text x="45" y="195" fill="#64748b" fontSize="10" fontWeight="bold">Ms (Inicio Martensita)</text>
-
-
-      {/* 2. ZONA DE TRANSFORMACIÓN (La "Nariz" o Curva C) - Gris claro translúcido */}
-      <path 
-        d="M 150 60 Q 100 130 150 200 L 400 200 L 400 60 Z" 
-        fill="rgba(203, 213, 225, 0.5)" 
-        stroke="#cbd5e1"
-        strokeWidth="2"
-      />
-      <text x="220" y="130" fill="#475569" fontSize="10" className="opacity-70 font-bold tracking-wide">ZONA DE TRANSFORMACIÓN</text>
-
-
-      {/* 3. CURVAS DE ENFRIAMIENTO */}
-      
-      {/* Punto de partida (Austenitización) */}
-      <circle cx="40" cy="30" r="5" fill="#dc2626" className="animate-pulse shadow-sm" stroke="white" strokeWidth="2"/>
-      <text x="50" y="30" fill="#dc2626" fontSize="11" fontWeight="800">Austenita</text>
-
-      {/* Rápido (Temple) - Azul vibrante */}
-      <path 
-        d="M 40 30 C 50 30, 60 220, 100 240" 
-        fill="none" 
-        stroke="#2563eb" 
-        strokeWidth="3" 
-        className="animate-[draw_2s_ease-out_forwards] drop-shadow-sm" 
-        strokeDasharray="400" 
-        strokeDashoffset="400"
-      />
-      <text x="60" y="230" fill="#2563eb" fontSize="11" fontWeight="bold" className="opacity-0 animate-[appear_0.5s_forwards_2s]">Temple</text>
-
-      {/* Moderado (Normalizado) - Verde esmeralda */}
-      <path 
-        d="M 40 30 C 120 30, 140 220, 250 240" 
-        fill="none" 
-        stroke="#16a34a" 
-        strokeWidth="3" 
-        className="animate-[draw_3s_ease-out_forwards] drop-shadow-sm" 
-        strokeDasharray="500" 
-        strokeDashoffset="500"
-      />
-      <text x="180" y="180" fill="#16a34a" fontSize="11" fontWeight="bold" className="opacity-0 animate-[appear_0.5s_forwards_3s]">Normalizado</text>
-
-      {/* Lento (Recocido) - Amarillo oscuro para contraste */}
-      <path 
-        d="M 40 30 C 200 30, 300 220, 390 220" 
-        fill="none" 
-        stroke="#ca8a04" 
-        strokeWidth="3" 
-        className="animate-[draw_4s_ease-out_forwards] drop-shadow-sm" 
-        strokeDasharray="600" 
-        strokeDashoffset="600"
-      />
-      {/* Usamos un amarillo más oscuro (ca8a04) para el texto sobre fondo blanco */}
-      <text x="310" y="100" fill="#ca8a04" fontSize="11" fontWeight="bold" className="opacity-0 animate-[appear_0.5s_forwards_4s]">Recocido</text>
-
-    </svg>
-      </div>
-
-      <div className="grid grid-cols-3 gap-2 text-center text-sm">
-        <div className="text-blue-600 font-semibold">Martensita (Duro)</div>
-        <div className="text-green-600 font-semibold">Perlita Fina</div>
-        <div className="text-yellow-600 font-semibold">Perlita Gruesa (Blando)</div>
-      </div>
-    </div>
-  </div>
-);
-
-const PanelInteractivo = () => {
-  const [temp, setTemp] = useState(0); // 0 a 100
-
-  return (
-    <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="bg-white p-6 rounded-xl shadow-md border border-slate-200">
-        <h3 className="text-xl font-bold text-slate-800 mb-2">Rol del calor en los materiales metálicos</h3>
-        <DivCarousel>
-           <div>
-       El <strong>calor</strong> proporciona la <strong>energía necesaria</strong> para que los átomos del metal se <strong>muevan</strong> y se <strong>reorganicen</strong>.
-        A determinadas temperaturas, los metales pueden experimentar transformaciones internas que modifican:
-        <ul>
-          <li>La disposición de los átomos.</li>
-          <li>El tamaño y la forma de los granos cristalinos.</li>
-          <li>La presencia y distribución de distintas fases internas.</li>
-        </ul>
-        Estos <strong>cambios estructurales</strong> son los responsables directos de las <strong>variaciones en las propiedades</strong> mecánicas y físicas del material.
-      </div>
-        </DivCarousel>
-
-        <div className="flex flex-col md:flex-row gap-8 items-center">
-            {/* Controles */}
-            <div className="w-full md:w-1/3 bg-slate-50 p-6 rounded-lg border border-slate-200">
-                <label className="block text-sm font-bold text-slate-700 mb-2">
-                    Temperatura: {temp * 10}°C
-                </label>
-                <input 
-                    type="range" 
-                    min="0" 
-                    max="100" 
-                    value={temp} 
-                    onChange={(e) => setTemp(parseInt(e.target.value))}
-                    className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-red-500"
-                />
-                <div className="flex justify-between text-xs text-slate-400 mt-2">
-                    <span>Frío</span>
-                    <span>Caliente</span>
-                </div>
-                
-                <div className="mt-6 text-sm text-slate-600">
-                    <p className="font-semibold">Efecto:</p>
-                    {temp < 30 && <p>Baja movilidad atómica. Estructura rígida.</p>}
-                    {temp >= 30 && temp < 70 && <p className="text-orange-600">Aumento de vibración. Posibilidad de difusión.</p>}
-                    {temp >= 70 && <p className="text-red-600 font-bold">Alta energía. Crecimiento de grano y cambio de fase.</p>}
-                </div>
-            </div>
-
-            {/* Visualización */}
-            <div className="w-full md:w-2/3 h-64 border-4 border-slate-800 rounded-lg bg-slate-900 relative overflow-hidden flex items-center justify-center">
-                <div className="absolute top-2 right-2 text-white font-mono z-10">
-                    Energía: {Math.floor(temp * 1.5)}%
-                </div>
-                
-                {/* Matriz de "átomos" */}
-                <div className="grid grid-cols-6 gap-2 p-4">
-                    {Array.from({ length: 24 }).map((_, i) => (
-                        <div 
-                            key={i}
-                            className={`rounded-full transition-all duration-300 shadow-[0_0_10px_rgba(255,255,255,0.3)]`}
-                            style={{
-                                width: `${20 + (temp / 10)}px`,
-                                height: `${20 + (temp / 10)}px`,
-                                backgroundColor: `rgb(${50 + temp * 2}, ${50}, ${100 - temp})`,
-                                transform: `scale(${1 + (temp/200)})`,
-                                animation: `vibrateAtom ${1.1 - (temp / 100)}s infinite alternate ease-in-out`
-                            }}
-                        />
-                    ))}
-                </div>
-                
-                {/* CSS local para la animación dinámica */}
-                <style>{`
-                    @keyframes vibrateAtom {
-                        0% { transform: translate(0, 0); }
-                        100% { transform: translate(${temp/10}px, ${temp/10}px); }
-                    }
-                `}</style>
-            </div>
-        </div>
-      </div>
+    <div className="overflow-x-auto rounded-lg border border-slate-200 shadow-sm">
+      <table className="w-full text-sm text-left">
+        <thead className="text-xs text-slate-700 uppercase bg-slate-100 border-b border-slate-200">
+          <tr>
+            <th className="px-6 py-4">Tipo de Modelo</th>
+            <th className="px-6 py-4">Base Teórica</th>
+            <th className="px-6 py-4">Uso de Datos</th>
+            <th className="px-6 py-4">Ventajas</th>
+            <th className="px-6 py-4">Limitaciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, idx) => (
+            <tr key={row.type} className={`border-b border-slate-100 last:border-none hover:bg-slate-50 ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}`}>
+              <td className="px-6 py-4 font-bold text-slate-800">{row.type}</td>
+              <td className="px-6 py-4 text-slate-600">{row.base}</td>
+              <td className="px-6 py-4 text-slate-600">{row.data}</td>
+              <td className="px-6 py-4 text-green-700">{row.pros}</td>
+              <td className="px-6 py-4 text-red-700">{row.cons}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };
 
-const PanelComparativo = () => (
-  <div className="space-y-6 animate-in slide-in-from-left-10 duration-500">
-    <div className="bg-white p-6 rounded-xl shadow-md border border-slate-200">
-      <h3 className="text-xl font-bold text-slate-800 mb-6">Diferencia entre tratamientos térmicos y otros procesos</h3>
+// --- Configuración de Pestañas ---
+
+const TABS: TabConfig[] = [
+  { 
+    id: 'overview', 
+    label: 'Visión General', 
+    icon: <Layout size={18} />, 
+    title: 'Introducción a la lección', 
+    description: (
       <DivCarousel>
-          <div>
-        A diferencia de la conformación mecánica o el mecanizado, los tratamientos térmicos no alteran la geometría externa de la pieza.
-        <br /><br />
-        Además:
-        <ul>
-          <li>Su acción es <strong>interna</strong> y estructural.</li>
-          <li>Son procesos <strong>complementarios</strong> a la fabricación.</li>
-          <li>Se diferencian de los tratamientos termoquímicos, ya que <strong>no modifican</strong> intencionalmente la <strong>composición química</strong> del material.</li>
-        </ul>
-      </div>
+        <p>Los <strong>modelos matemáticos</strong> se clasifican según su <strong>fundamento teórico</strong> y su relación con los <strong>datos experimentales</strong>, con el fin de reconocer sus diferencias y <strong>seleccionar el modelo más adecuado</strong> según el problema a estudiar.</p>
+        <p>Los<strong> modelos matemáticos</strong> permiten <strong>representar la realidad</strong> mediante <strong>ecuaciones</strong>, <strong>relaciones</strong> y <strong>estructuras formales</strong>. Sin embargo, no todos los modelos se construyen de la misma manera. </p><p>Algunos surgen directamente de <strong>leyes científicas</strong>, otros combinan<strong> teoría con datos experimentales</strong> y otros se basan únicamente en <strong>observaciones</strong>. <br />Esta diversidad hace necesaria una clasificación que ayude a comprender su alcance y sus límites.</p>
       </DivCarousel>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-8 divide-y md:divide-y-0 md:divide-x divide-slate-200">
-        
-        {/* Conformado */}
-        <div className="p-4 text-center">
-            <div className="flex justify-center mb-4">
-                <div className="bg-slate-100 p-4 rounded-full">
-                    <Hammer className="w-12 h-12 text-slate-600" />
-                </div>
-            </div>
-            <h4 className="text-lg font-bold text-slate-700 mb-2">Procesos de Conformado</h4>
-            <p className="text-sm text-slate-500 mb-4">(Forja, Laminado, Extrusión)</p>
-            
-            <ul className="text-left space-y-2 text-slate-600 text-sm bg-slate-50 p-4 rounded-lg">
-                <li className="flex items-center gap-2"><ArrowRight className="w-4 h-4 text-slate-400"/> Cambia la <strong>Forma Externa</strong>.</li>
-                <li className="flex items-center gap-2"><ArrowRight className="w-4 h-4 text-slate-400"/> Aplica fuerza mecánica.</li>
-                <li className="flex items-center gap-2"><ArrowRight className="w-4 h-4 text-slate-400"/> El objetivo es la geometría.</li>
-            </ul>
-        </div>
-
-        {/* Térmico */}
-        <div className="p-4 text-center">
-            <div className="flex justify-center mb-4">
-                <div className="bg-red-50 p-4 rounded-full">
-                    <Layers className="w-12 h-12 text-red-600" />
-                </div>
-            </div>
-            <h4 className="text-lg font-bold text-slate-700 mb-2">Tratamientos Térmicos</h4>
-            <p className="text-sm text-slate-500 mb-4">(Temple, Recocido, Revenido)</p>
-            
-            <ul className="text-left space-y-2 text-slate-600 text-sm bg-red-50 p-4 rounded-lg">
-                <li className="flex items-center gap-2"><ArrowRight className="w-4 h-4 text-red-400"/> Cambia la <strong>Estructura Interna</strong>.</li>
-                <li className="flex items-center gap-2"><ArrowRight className="w-4 h-4 text-red-400"/> Aplica energía térmica.</li>
-                <li className="flex items-center gap-2"><ArrowRight className="w-4 h-4 text-red-400"/> El objetivo son las propiedades (Dureza/Tenacidad).</li>
-            </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-);
-
-const PanelIntegrador = () => (
-  <div className="space-y-6 animate-in zoom-in duration-500">
-    <div className=" p-8 rounded-xl shadow-xl ">
-      <h3 className="text-2xl font-bold mb-4 flex items-center gap-3">
-        <Activity className="w-8 h-8 text-green-400" />
-        Cierre de la lección
-      </h3>
+    )
+  },
+  { 
+    id: 'continuum', 
+    label: 'El Continuo', 
+    icon: <Activity size={18} />,
+    title: 'Criterio de clasificación de los modelos matemáticos',
+    description: (
       <DivCarousel>
-         <div>
-        Los tratamientos térmicos son procesos esenciales para el control de las propiedades de los metales en la ingeniería de materiales. Mediante el uso adecuado del calor, el tiempo y el enfriamiento, es posible adaptar un material a distintas exigencias técnicas e industriales.
-        <br /><br />
-        Esta lección ha introducido el concepto general, sus etapas fundamentales y su importancia como base para comprender los fenómenos físicos y microestructurales que se desarrollarán en las siguientes lecciones del módulo.
-      </div>
-      </DivCarousel>
+        <div><p>La <strong>clasificación</strong> de los modelos matemáticos se fundamenta en dos aspectos clave:</p>
+<ul>
+<li>El <strong>origen de las ecuaciones</strong> que describen el sistema.</li>
+<li>El grado de <strong>dependencia de datos experimentales</strong> para construir o ajustar el modelo.</li>
+</ul></div>
 
-      <div className="text-white grid grid-cols-1 md:grid-cols-4 gap-4">
-        {[
-          { label: "Material Base", desc: "Estructura inicial", color: "bg-slate-700" },
-          { label: "Calentamiento", desc: "Activación atómica", color: "bg-red-600" },
-          { label: "Mantenimiento", desc: "Homogeneización", color: "bg-orange-600" },
-          { label: "Enfriamiento", desc: "Fijación de propiedades", color: "bg-blue-600" },
-        ].map((item, idx) => (
-          <div key={idx} className={`${item.color} p-4 rounded-lg border border-white/10 hover:transform hover:-translate-y-1 transition-transform cursor-default`}>
-            <div className="text-2xl font-bold opacity-20 mb-1">{idx + 1}</div>
-            <h4 className="font-bold text-lg mb-1">{item.label}</h4>
-            <p className="text-xs opacity-80">{item.desc}</p>
-          </div>
-        ))}
-      </div>
+<p>Según estos <strong>criterios</strong>, los modelos pueden ubicarse en un continuo que va desde aquellos completamente fundamentados en la <strong>teoría</strong> hasta aquellos construidos únicamente a partir de <strong>datos</strong>.</p>
+<div><p><strong>Aspectos clave del criterio:</strong></p>
+<ul>
+<li>Nivel de abstracción teórica.</li>
+<li>Uso de leyes científicas previas.</li>
+<li>Necesidad de calibración experimental.</li>
+</ul></div>
 
-      <div className="mt-8 pt-8 border-t border-white/20 text-center">
-        <p className="text-lg font-medium text-green-800">Resultado Final:</p>
-        <p className="text-2xl font-bold mt-2">Propiedades Mecánicas Optimizadas</p>
-      </div>
-    </div>
-  </div>
-);
+</DivCarousel>
+    )
+  },
+  { 
+    id: 'theoretical', 
+    label: 'Proceso Teórico', 
+    icon: <BookOpen size={18} />,
+    title: 'Modelos teóricos',
+    description: (
+<DivCarousel>
+<p>Los <strong>modelos teóricos</strong> se desarrollan a partir de<strong> principios fundamentales</strong> y <strong>leyes científicas</strong> bien establecidas. <br /> Su formulación <strong>no depende</strong> inicialmente de <strong>datos</strong> <strong>experimentales</strong>, sino del razonamiento lógico y matemático.</p>
+<p>Estos modelos buscan <strong>explicar el comportamiento del sistema desde sus bases conceptuales</strong>, lo que les otorga un alto valor explicativo.</p>
+<div><p><strong>Características principales:</strong></p>
+<ul>
+<li>Se basan en <strong>leyes</strong> físicas, químicas o matemáticas.</li>
+<li>Poseen una <strong>estructura matemática</strong> rigurosa.</li>
+<li>Permiten <strong>deducir</strong> comportamientos y realizar <strong>predicciones</strong> bajo supuestos definidos.</li>
+</ul></div>
+<div><p><strong>Ventajas y limitaciones:</strong></p>
+<ul>
+<li>Facilitan una <strong>comprensión profunda</strong> del fenómeno.</li>
+<li>Pueden perder validez si las suposiciones no representan adecuadamente la realidad.</li>
+</ul></div>
+
+</DivCarousel>
+)
+  },
+  { 
+    id: 'calibration', 
+    label: 'Calibración', 
+    icon: <Settings size={18} />,
+    title: 'Modelos semi-teóricos',
+    description: (
+<DivCarousel>
+<p>Los <strong>modelos semi-teóricos </strong>parten de una <strong>base teórica</strong>, pero incorporan <strong>parámetros</strong> que no se conocen con exactitud y que <strong>deben ajustarse</strong> usando datos reales. <br /> Este enfoque es común en áreas aplicadas donde la teoría por sí sola no es suficiente.</p>
+<p>Estos modelos permiten <strong>representar sistemas complejos de forma más realista</strong> que los modelos puramente teóricos.</p>
+<div><p><strong>Características principales:</strong></p>
+<ul>
+<li>Integran <strong>fundamentos teóricos</strong> con <strong>observaciones experimentales</strong>.</li>
+<li><strong>Requieren</strong> procesos de <strong>calibración</strong>.</li>
+<li>Son ampliamente utilizados en ingeniería y ciencias aplicadas.</li>
+</ul></div>
+<div><p><strong>Ventajas y limitaciones:</strong></p>
+<ul>
+<li>Ofrecen buen equilibrio entre <strong>precisión</strong> y <strong>comprensión</strong>.</li>
+<li>Su confiabilidad depende de la<strong> calidad de los datos</strong> disponibles.</li>
+</ul></div>
+
+</DivCarousel>
+)
+  },
+  { 
+    id: 'empirical', 
+    label: 'Empírico', 
+    icon: <Database size={18} />,
+    title: 'Modelos empíricos',
+    description: (
+<DivCarousel>
+<p>Los <strong>modelos empíricos</strong> se construyen <strong>exclusivamente a partir de datos</strong> observados. </p>
+<p>No buscan explicar el mecanismo interno del sistema, sino encontrar <strong>relaciones matemáticas</strong> que permitan <strong>describir</strong> o <strong>predecir</strong> su comportamiento dentro de un <strong>rango específico</strong>.</p>
+<p>Son especialmente útiles cuando el <strong>fenómeno es complejo</strong> o <strong>poco comprendido</strong> desde el <strong>punto de vista teórico</strong>.</p>
+<div><p><strong>Características principales:</strong></p>
+<ul>
+<li>Se basan en <strong>correlaciones estadísticas</strong>.</li>
+<li><strong>No explican las causas</strong> del fenómeno.</li>
+<li><strong>Dependen</strong> fuertemente del conjunto de <strong>datos utilizado</strong>.</li>
+</ul></div>
+<div><p><strong>Ventajas y limitaciones:</strong></p>
+<ul>
+<li>Permiten <strong>modelar fenómenos sin teoría</strong> previa.</li>
+<li>Su capacidad predictiva es <strong>limitada fuera del rango de datos</strong> analizados.</li>
+</ul></div>
+
+</DivCarousel>
+)
+  },
+  { 
+    id: 'comparison', 
+    label: 'Comparativa', 
+    icon: <GitCommit size={18} />,
+    title: 'Cierre de la lección',
+    description: (<DivCarousel>
+<p><strong>Clasificar los modelos matemáticos</strong> en teóricos, semi-teóricos y empíricos permite entender cómo se construyen, qué tipo de información utilizan y cuáles son sus alcances. </p><p><strong>Cada tipo responde a necesidades distintas</strong>: explicación profunda, equilibrio entre teoría y práctica, o predicción basada en datos. Reconocer estas diferencias es esencial para aplicar correctamente los modelos en la ciencia, la ingeniería y la tecnología.</p>
+</DivCarousel>)
+  },
+];
 
 // --- Componente Principal ---
 
-export default function Lesson1() {
-  const [activeTab, setActiveTab] = useState<TabId>('contexto');
+const App = () => {
+  const [activeTabId, setActiveTabId] = useState<string>(TABS[0].id);
 
-  const tabs: TabConfig[] = [
-    { id: 'contexto', label: 'Contexto', icon: <Search className="w-4 h-4" /> },
-    { id: 'proceso', label: 'Proceso', icon: <Activity className="w-4 h-4" /> },
-    { id: 'calentamiento', label: 'Calentar', icon: <Flame className="w-4 h-4" /> },
-    { id: 'mantenimiento', label: 'Mantener', icon: <Clock className="w-4 h-4" /> },
-    { id: 'enfriamiento', label: 'Enfriar', icon: <Snowflake className="w-4 h-4" /> },
-    { id: 'calor', label: 'Interactivo', icon: <Thermometer className="w-4 h-4" /> },
-    { id: 'comparativo', label: 'Conformado', icon: <Hammer className="w-4 h-4" /> },
-    { id: 'integrador', label: 'Resumen', icon: <Layers className="w-4 h-4" /> },
-  ];
+  const activeTab = TABS.find(t => t.id === activeTabId) || TABS[0];
 
   const renderContent = () => {
-    switch (activeTab) {
-      case 'contexto': return <PanelContexto />;
-      case 'proceso': return <PanelProceso />;
-      case 'calentamiento': return <PanelCalentamiento />;
-      case 'mantenimiento': return <PanelMantenimiento />;
-      case 'enfriamiento': return <PanelEnfriamiento />;
-      case 'calor': return <PanelInteractivo />;
-      case 'comparativo': return <PanelComparativo />;
-      case 'integrador': return <PanelIntegrador />;
-      default: return <PanelContexto />;
+    switch (activeTabId) {
+      case 'overview': return <GeneralSchemeDiagram />;
+      case 'continuum': return <ContinuumDiagram />;
+      case 'theoretical': return <TheoreticalProcessDiagram />;
+      case 'calibration': return <CalibrationDiagram />;
+      case 'empirical': return <EmpiricalDiagram />;
+      case 'comparison': return <ComparisonTable />;
+      default: return null;
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 font-sans text-slate-900 pb-10">
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
-    <div className="max-w-7xl mx-auto p-4">
- <h1 className="text-2xl font-bold text-slate-800 mb-4 text-center">Introducción a los tratamientos térmicos</h1>
-      {/* Navegación por Pestañas */}
-    
-          <nav className="grid grid-cols-8 gap-2" aria-label="Tabs">
-            {tabs.map((tab) => (
+    <div className="min-h-screen bg-slate-100 text-slate-800 font-sans p-4 md:p-8">
+      
+      {/* Layout Grid Principal */}
+      <GridContainer className="grid-rows-[auto_auto_1fr] gap-6 max-w-6xl mx-auto h-full min-h-[800px]">
+        
+        {/* 1. Header Area */}
+        <header className="grid grid-cols-[auto_1fr] items-center gap-4 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+        
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">Clasificación de los modelos matemáticos</h1>
+           
+          </div>
+        </header>
+
+        {/* 2. Tabs Navigation */}
+        <nav className="bg-white p-2 rounded-xl shadow-sm border border-slate-200">
+          <div className="grid grid-cols-6 gap-2 w-full">
+            {TABS.map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`
-                  flex flex-col items-center justify-center p-3 rounded-md transition-all duration-200 text-sm font-medium
-                  ${activeTab === tab.id
-                     ? 'bg-blue-600 text-white shadow-md transform scale-105' 
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900'}
-                  
-                `}
+                onClick={() => setActiveTabId(tab.id)}
+                className={`flex flex-col lg:flex-row items-center justify-center w-full gap-2 px-2 py-3 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 border-2 h-full
+                  ${activeTabId === tab.id 
+                    ? 'bg-blue-50 border-blue-600 text-blue-700 shadow-sm' 
+                    : 'bg-transparent border-transparent text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                  }`}
               >
                 {tab.icon}
-                {tab.label}
+                <span className="text-center">{tab.label}</span>
               </button>
             ))}
-          </nav>
-        
-      </div>
-</header>
-      {/* Área de Contenido Principal */}
-      <main className="max-w-4xl mx-auto px-4 py-8">
-        {renderContent()}
-      </main>
+          </div>
+        </nav>
 
+        {/* 3. Main Content Area */}
+        <main className="grid grid-rows-[auto_1fr] gap-6">
+          
+          {/* Section Info Card */}
+          <Card className="p-6 border-l-4 border-l-blue-600">
+            <h2 className="text-xl font-bold text-slate-800 mb-2">{activeTab.title}</h2>
+            {activeTab.description}
+          </Card>
+
+          {/* Diagram Render Wrapper */}
+          <Card className="bg-white min-h-[400px] grid place-items-stretch">
+            {renderContent()}
+          </Card>
+          
+        </main>
+
+      </GridContainer>
     </div>
   );
-}
+};
+
+export default App;

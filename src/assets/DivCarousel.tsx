@@ -14,7 +14,6 @@ function DivCarousel({ children }: DivCarouselProps) {
   };
 
   // porcentaje de la barra
-  const progress = ((index + 1) / items.length) * 100;
 
   return (
     <div style={{ width: "100%" }} className="pb-4">
@@ -31,24 +30,26 @@ function DivCarousel({ children }: DivCarouselProps) {
 
       {/* BARRA DE PROGRESO */}
       <div
-        style={{
-          marginTop: 10,
-          width: "100%",
-          height: 6,
-          backgroundColor: "#e0e0e0",
-          borderRadius: 4,
-          overflow: "hidden",
-        }}
-      >
-        <div
-          style={{
-            width: `${progress}%`,
-            height: "100%",
-            backgroundColor: "#4f46e5",
-            transition: "width 0.3s ease",
-          }}
-        />
-      </div>
+  style={{
+    marginTop: 10,
+    display: "flex",
+    gap: 4,
+    width: "100%",
+  }}
+>
+  {items.map((_, i) => (
+    <div
+      key={i}
+      style={{
+        flex: 1,
+        height: 6,
+        borderRadius: 4,
+        backgroundColor: i <= index ? "#4f46e5" : "#e0e0e0",
+        transition: "background-color 0.3s ease",
+      }}
+    />
+  ))}
+</div>
     </div>
   );
 }
