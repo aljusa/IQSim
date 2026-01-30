@@ -291,7 +291,7 @@ export default function App() {
         <p>
           No todos los procesos se comportan de la misma forma ni requieren el mismo tratamiento computacional. Algunos pueden analizarse suponiendo condiciones constantes, mientras que otros requieren estudiar su evolución temporal. De manera paralela, los modelos pueden resolverse siguiendo una secuencia lógica de unidades o como un sistema global de ecuaciones.
         </p>
-        <p>
+        <div> <p>
           En esta lección se abordan:
         </p>
         <ul>
@@ -300,7 +300,8 @@ export default function App() {
         </ul>
         <p>
           Este análisis permite comprender las ventajas, limitaciones y aplicaciones de cada alternativa.
-        </p>
+        </p></div>
+       
       </DivCarousel>
     )
     },
@@ -310,7 +311,25 @@ export default function App() {
       icon: <Activity size={20} />, 
       section: 'Sección 2.2.2',
       title: 'Estado Estacionario',
-      description: 'En el estado estacionario, las propiedades del sistema no cambian con respecto al tiempo. Se asume que el proceso ha alcanzado un equilibrio operativo donde las entradas son iguales a las salidas más el consumo/generación. Es el estándar para el diseño de plantas y balances de materia.'
+      description:  (
+      <DivCarousel>
+        <p>
+          Un proceso estacionario es aquel en el que las variables de interés no cambian con el tiempo. El sistema opera en condiciones constantes y se encuentra en equilibrio. La simulación estacionaria se enfoca en describir ese estado final sin considerar cómo se llegó a él.
+        </p>
+        <div><p>
+          Este tipo de simulación se utiliza principalmente para:
+        </p>
+        <ul>
+          <li>Resolver balances de materia y energía en estado estable.</li>
+          <li>Analizar el desempeño del proceso bajo condiciones fijas.</li>
+          <li>Comparar diferentes escenarios operativos.</li>
+        </ul>
+        <p>
+          Debido a su menor complejidad, la simulación estacionaria es ampliamente empleada en el diseño y análisis preliminar de procesos.
+        </p></div>
+        
+      </DivCarousel>
+    )
     },
     { 
       id: 'dynamic', 
@@ -318,7 +337,25 @@ export default function App() {
       icon: <Settings size={20} />, 
       section: 'Sección 2.2.3',
       title: 'Simulación Dinámica',
-      description: 'Representa sistemas donde las variables evolucionan temporalmente. Es crucial para estudiar el arranque (start-up) de una planta, paradas de emergencia y el diseño de sistemas de control automático que deben responder a perturbaciones externas.'
+      description:  (
+      <DivCarousel>
+        <p>
+          En los procesos no estacionarios o dinámicos, las variables cambian con el tiempo. Este comportamiento es típico durante arranques, paradas, perturbaciones externas o cambios en las condiciones de operación.
+        </p>
+        <ul> <p>
+          La simulación no estacionaria se caracteriza por:
+        </p>
+        <ul>
+          <li>Considerar explícitamente el tiempo como variable independiente.</li>
+          <li>Formular ecuaciones diferenciales que describen la evolución del sistema.</li>
+          <li>Analizar la respuesta dinámica del proceso ante cambios.</li>
+        </ul>
+        <p>
+          Este tipo de simulación es fundamental para el estudio de control de procesos, estabilidad y seguridad operativa.
+        </p></ul>
+       
+      </DivCarousel>
+    )
     },
     { 
       id: 'modular', 
@@ -326,7 +363,25 @@ export default function App() {
       icon: <ChevronRight size={20} />, 
       section: 'Sección 2.2.4',
       title: 'Enfoque Modular Secuencial',
-      description: 'El proceso se divide en módulos de operación unitaria individuales. El simulador resuelve cada bloque secuencialmente, utilizando las salidas de un bloque como entradas para el siguiente. Los reciclos requieren métodos iterativos para converger.'
+      description: (
+      <DivCarousel>
+        <p>
+          El simulador modular secuencial representa el proceso como una cadena de módulos o unidades de operación conectadas entre sí. Cada unidad se resuelve de forma independiente siguiendo el orden del flujo del proceso.
+        </p>
+        <div><p>
+          Sus características principales incluyen:
+        </p>
+        <ul>
+          <li>Resolución paso a paso de cada módulo.</li>
+          <li>Uso de resultados intermedios como entradas para las unidades siguientes.</li>
+          <li>Estructura intuitiva y cercana al diagrama de flujo del proceso.</li>
+        </ul>
+        <p>
+          Este enfoque es muy utilizado en simuladores comerciales, especialmente para procesos estacionarios, aunque requiere estrategias especiales cuando existen ciclos de recirculación.
+        </p></div>
+        
+      </DivCarousel>
+    )
     },
     { 
       id: 'equations', 
@@ -334,7 +389,25 @@ export default function App() {
       icon: <Cpu size={20} />, 
       section: 'Sección 2.2.5',
       title: 'Basado en Ecuaciones',
-      description: 'Todas las relaciones matemáticas del proceso (balances, termodinámica, cinética) se consolidan en un único sistema de ecuaciones algebraico-diferenciales. Se resuelve de forma simultánea, permitiendo una mayor flexibilidad en la especificación de variables.'
+      description: (
+      <DivCarousel>
+        <p>
+          El simulador basado en ecuaciones plantea el modelo del proceso como un conjunto global de ecuaciones algebraicas y/o diferenciales que se resuelven de manera simultánea.
+        </p>
+        <div> <p>
+          Este enfoque se distingue por:
+        </p>
+        <ul>
+          <li>No depender de un orden secuencial de cálculo.</li>
+          <li>Tratar todas las variables como parte de un sistema integrado.</li>
+          <li>Ofrecer mayor flexibilidad para procesos complejos y altamente acoplados.</li>
+        </ul>
+        <p>
+          Aunque exige mayor esfuerzo computacional y conceptual, resulta especialmente adecuado para procesos dinámicos y sistemas con múltiples interacciones.
+        </p></div>
+       
+      </DivCarousel>
+    )
     },
     { 
       id: 'interactive', 
@@ -342,7 +415,22 @@ export default function App() {
       icon: <Database size={20} />, 
       section: 'Sección 2.2.6',
       title: 'Relación y Herramientas',
-      description: 'Existen múltiples herramientas dependiendo del objetivo. Mientras que simuladores comerciales (HYSYS) dominan el entorno industrial modular, lenguajes como Python o Julia son preferidos para optimización avanzada basada en ecuaciones.'
+      description: (
+      <DivCarousel>
+        <div><p>
+          La implementación práctica de los tipos de simulación estudiados se apoya en herramientas computacionales de cálculo numérico y visualización. Lenguajes y entornos como Python u Octave permiten:
+        </p>
+        <ul>
+          <li>Resolver sistemas de ecuaciones algebraicas y diferenciales.</li>
+          <li>Implementar simulaciones estacionarias y dinámicas.</li>
+          <li>Analizar y visualizar el comportamiento del proceso.</li>
+        </ul>
+        <p>
+          Estas herramientas facilitan el prototipado de modelos y refuerzan la comprensión conceptual de los enfoques de simulación.
+        </p></div>
+        
+      </DivCarousel>
+    )
     }
   ];
 
@@ -358,7 +446,7 @@ export default function App() {
               <Cpu size={32} />
             </div>
             <div>
-              <h1 className="text-2xl font-black tracking-tight text-slate-800">Simulación de Procesos</h1>
+              <h1 className="text-2xl font-black tracking-tight text-slate-800">Tipos de simulación y enfoques computacionales</h1>
             </div>
           </div>
         </header>

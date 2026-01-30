@@ -426,7 +426,7 @@ export default function StructuralAnalysisApp() {
             <BookOpen className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold">Fundamentos Previos a la Simulación</h1>
+            <h1 className="text-xl font-bold">Fundamentos del análisis y simulación de procesos</h1>
           </div>
         </header>
 

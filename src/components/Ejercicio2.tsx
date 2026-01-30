@@ -21,16 +21,6 @@ interface SimulationState {
   recycleSplit: number; // Calculated
 }
 
-interface ExcelCell {
-  id: string;
-  label: string;
-  value: string | number;
-  formula: string;
-  isUserEditable: boolean;
-  userFormula?: string;
-  correctFormulaPattern?: RegExp;
-}
-
 // --- Componente Principal ---
 export default function App() {
   const [activeStep, setActiveStep] = useState<Step>('contexto');
