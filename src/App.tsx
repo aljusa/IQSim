@@ -6,6 +6,9 @@ import Lesson4a from './components/Lesson4a'
 import Lesson4b from './components/Lesson4b'
 import Ejercicios1 from './components/Ejercicios1'
 import Lesson5 from './components/Lesson5'
+import Ejercicio2 from './components/Ejercicio2'
+import Lesson6 from './components/Lesson6'
+
 function App() {
   const [lesson, setLesson] = useState('lesson1')
 
@@ -28,6 +31,13 @@ case 'lesson4b':
 
         case 'lesson5':
         return <Lesson5 />
+
+        case 'Ejercicio2':
+        return <Ejercicio2 />
+
+
+          case 'lesson6':
+        return <Lesson6 />
       default:
         return null
     }
@@ -43,6 +53,10 @@ case 'lesson4b':
         <option value="lesson4b">Lección 4b</option>
         <option value="Ejercicios1">Ejercicios 1</option>
          <option value="lesson5">Lección 5</option>
+         <option value="Ejercicio2">Ejercicio 2</option>
+       <option value="lesson6">Lección 6</option>
+        
+      
       </select>
 
       <hr />
