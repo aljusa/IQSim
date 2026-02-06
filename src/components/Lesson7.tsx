@@ -1,10 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, 
-  AreaChart, Area, BarChart, Bar, Cell
+  AreaChart, Area, BarChart, Bar
 } from 'recharts';
 import { 
-  Settings, Database, Activity, Thermometer, FlaskConical, Layers, 
+  Settings,  Activity, Thermometer, FlaskConical, Layers, 
   Cpu, Code2, Share2, Info, ChevronRight, Binary
 } from 'lucide-react';
 import DivCarousel from '../assets/DivCarousel';
